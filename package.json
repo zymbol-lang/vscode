@@ -1,0 +1,200 @@
+{
+  "name": "zymbol-lang",
+  "displayName": "Zymbol-Lang",
+  "description": "Official VSCode extension for Zymbol-Lang - A minimalist symbolic programming language with full LSP support",
+  "version": "0.1.0",
+  "publisher": "zymbol-lang-team",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Linters",
+    "Formatters"
+  ],
+  "keywords": [
+    "zymbol",
+    "zymbol-lang",
+    "symbolic",
+    "minimalist",
+    "no-keywords",
+    "functional",
+    "lsp"
+  ],
+  "main": "./out/extension.js",
+  "icon": "logo.png",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zymbol-lang/vscode.git"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "zymbol",
+        "aliases": [
+          "Zymbol-Lang",
+          "zymbol"
+        ],
+        "extensions": [
+          ".zy"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/zymbol-file-icon.svg",
+          "dark": "./icons/zymbol-file-icon-dark.svg"
+        }
+      }
+    ],
+    "iconThemes": [
+      {
+        "id": "zymbol-file-icons",
+        "label": "Zymbol File Icons",
+        "path": "./icons/zymbol-icon-theme.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "zymbol",
+        "scopeName": "source.zymbol",
+        "path": "./syntaxes/zymbol.tmGrammar.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "zymbol",
+        "path": "./snippets/zymbol.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "zymbol-lang.run",
+        "title": "Run Zymbol-Lang File",
+        "category": "Zymbol-Lang",
+        "icon": "$(play)"
+      },
+      {
+        "command": "zymbol-lang.restartServer",
+        "title": "Restart Language Server",
+        "category": "Zymbol-Lang"
+      },
+      {
+        "command": "zymbol-lang.formatDocument",
+        "title": "Format Document",
+        "category": "Zymbol-Lang"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "zymbol-lang.run",
+        "key": "f5",
+        "when": "editorTextFocus && resourceExtname == '.zy'"
+      },
+      {
+        "command": "editor.action.formatDocument",
+        "key": "shift+alt+f",
+        "when": "editorTextFocus && resourceExtname == '.zy'"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "zymbol-lang.run",
+          "when": "resourceExtname == '.zy'",
+          "group": "navigation@1"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "zymbol-lang.run",
+          "when": "resourceExtname == '.zy'",
+          "group": "zymbol@1"
+        },
+        {
+          "command": "zymbol-lang.formatDocument",
+          "when": "resourceExtname == '.zy'",
+          "group": "1_modification@1"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Zymbol-Lang",
+      "properties": {
+        "zymbol-lang.executablePath": {
+          "type": "string",
+          "default": "zymbol",
+          "description": "Path to Zymbol-Lang CLI executable for running files"
+        },
+        "zymbol-lang.lspPath": {
+          "type": "string",
+          "default": "zymbol-lsp",
+          "description": "Path to Zymbol-Lang LSP server executable"
+        },
+        "zymbol-lang.enableLsp": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Language Server Protocol features (diagnostics, go-to-definition, etc.)"
+        },
+        "zymbol-lang.runInTerminal": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run Zymbol-Lang code in terminal instead of output panel"
+        },
+        "zymbol-lang.showOutputPanel": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show output panel when running Zymbol-Lang code"
+        },
+        "zymbol-lang.trace.server": {
+          "type": "string",
+          "enum": ["off", "messages", "verbose"],
+          "default": "off",
+          "description": "Trace communication between VS Code and the Zymbol language server"
+        },
+        "zymbol-lang.formatOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically format Zymbol files on save"
+        },
+        "zymbol-lang.formatter.indentSize": {
+          "type": "number",
+          "default": 4,
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Number of spaces for indentation when formatting"
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[zymbol]": {
+        "editor.formatOnSave": false,
+        "editor.defaultFormatter": "zymbol-lang-team.zymbol-lang",
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+      }
+    }
+  },
+  "capabilities": {
+    "documentFormattingProvider": "true"
+  },
+  "activationEvents": [
+    "onLanguage:zymbol"
+  ],
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.75.0",
+    "@vscode/vsce": "^2.32.0",
+    "typescript": "^5.3.2"
+  },
+  "license": "AGPL-3.0",
+  "author": "zymbol-lang-team"
+}

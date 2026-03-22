@@ -1,0 +1,201 @@
+{
+  "If Statement": {
+    "prefix": "if",
+    "body": [
+      "? ${1:condition} {",
+      "\t$0",
+      "}"
+    ],
+    "description": "If conditional statement"
+  },
+  "If-Else Statement": {
+    "prefix": "ifelse",
+    "body": [
+      "? ${1:condition} {",
+      "\t${2:// true branch}",
+      "}",
+      "_{",
+      "\t${3:// false branch}",
+      "}"
+    ],
+    "description": "If-else statement"
+  },
+  "If-ElseIf-Else Statement": {
+    "prefix": "ifelif",
+    "body": [
+      "? ${1:condition1} {",
+      "\t${2:// first branch}",
+      "}",
+      "_? ${3:condition2} {",
+      "\t${4:// second branch}",
+      "}",
+      "_{",
+      "\t${5:// else branch}",
+      "}"
+    ],
+    "description": "If-elseif-else statement"
+  },
+  "Match Statement": {
+    "prefix": "match",
+    "body": [
+      "result = ?? ${1:value} {",
+      "\t${2:pattern1} : ${3:value1}",
+      "\t${4:pattern2} : ${5:value2}",
+      "\t_ : ${6:default}",
+      "}"
+    ],
+    "description": "Pattern matching statement"
+  },
+  "For-Each Loop": {
+    "prefix": "for",
+    "body": [
+      "@ ${1:item}:${2:iterable} {",
+      "\t$0",
+      "}"
+    ],
+    "description": "For-each loop"
+  },
+  "While Loop": {
+    "prefix": "while",
+    "body": [
+      "@ ${1:condition} {",
+      "\t$0",
+      "}"
+    ],
+    "description": "While loop"
+  },
+  "Infinite Loop": {
+    "prefix": "loop",
+    "body": [
+      "@ {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Infinite loop"
+  },
+  "Range Loop": {
+    "prefix": "range",
+    "body": [
+      "@ ${1:i}:${2:start}..${3:end} {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Range loop"
+  },
+  "Lambda Function": {
+    "prefix": "lambda",
+    "body": [
+      "${1:name} = ${2:param} -> ${3:expr}"
+    ],
+    "description": "Lambda function (simple)"
+  },
+  "Lambda Block": {
+    "prefix": "lambdablock",
+    "body": [
+      "${1:name} = ${2:param} -> {",
+      "\t${3:// body}",
+      "\t<~ ${4:result}",
+      "}"
+    ],
+    "description": "Lambda function (block)"
+  },
+  "Traditional Function": {
+    "prefix": "func",
+    "body": [
+      "${1:name}(${2:params}) {",
+      "\t${3:// body}",
+      "\t<~ ${4:result}",
+      "}"
+    ],
+    "description": "Traditional function"
+  },
+  "Output": {
+    "prefix": "out",
+    "body": [
+      ">> ${1:value} ¶"
+    ],
+    "description": "Output with newline"
+  },
+  "Input": {
+    "prefix": "in",
+    "body": [
+      "<< \"${1:prompt}: \" ${2:variable}"
+    ],
+    "description": "Input with prompt"
+  },
+  "Named Tuple": {
+    "prefix": "ntuple",
+    "body": [
+      "(${1:field1}: ${2:value1}, ${3:field2}: ${4:value2})"
+    ],
+    "description": "Named tuple"
+  },
+  "Array": {
+    "prefix": "arr",
+    "body": [
+      "[${1:item1}, ${2:item2}, ${3:item3}]"
+    ],
+    "description": "Array literal"
+  },
+  "Import Module": {
+    "prefix": "import",
+    "body": [
+      "<# ${1:module_path}"
+    ],
+    "description": "Import module"
+  },
+  "Import Function": {
+    "prefix": "importfunc",
+    "body": [
+      "<# ${1:module_path}:${2:function_name}"
+    ],
+    "description": "Import specific function"
+  },
+  "Type Metadata": {
+    "prefix": "meta",
+    "body": [
+      "info = ${1:value}#?",
+      "type_symbol = info[0]",
+      "count = info[1]",
+      "value = info[2]"
+    ],
+    "description": "Get type metadata"
+  },
+  "Numeric Evaluation": {
+    "prefix": "numeval",
+    "body": [
+      "num = #|${1:string}|"
+    ],
+    "description": "Safe string-to-number conversion"
+  },
+  "Scientific Format": {
+    "prefix": "sci",
+    "body": [
+      "e|${1:value}|"
+    ],
+    "description": "Scientific notation format"
+  },
+  "Comma Format": {
+    "prefix": "comma",
+    "body": [
+      "c|${1:value}|"
+    ],
+    "description": "Comma-separated format"
+  },
+  "Module Declaration": {
+    "prefix": "module",
+    "body": [
+      "# ${1:module_name}",
+      "",
+      "$0"
+    ],
+    "description": "Module declaration"
+  },
+  "Comment": {
+    "prefix": "//",
+    "body": [
+      "// ${1:comment}"
+    ],
+    "description": "Line comment"
+  }
+}

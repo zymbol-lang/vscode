@@ -1,0 +1,29 @@
+{
+  "id": "zymbol-file-icons",
+  "label": "Zymbol File Icons",
+  "version": "1.0.0",
+  "fileExtensions": {
+    "zy": "zymbol-file"
+  },
+  "iconDefinitions": {
+    "zymbol-file": {
+      "iconPath": "./zymbol-file-icon.svg"
+    },
+    "zymbol-file_light": {
+      "iconPath": "./zymbol-file-icon.svg"
+    },
+    "zymbol-file_dark": {
+      "iconPath": "./zymbol-file-icon-dark.svg"
+    }
+  },
+  "light": {
+    "fileExtensions": {
+      "zy": "zymbol-file_light"
+    }
+  },
+  "highContrast": {
+    "fileExtensions": {
+      "zy": "zymbol-file_dark"
+    }
+  }
+}
