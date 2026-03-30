@@ -42,7 +42,7 @@ Complete TextMate grammar covering all Zymbol-Lang constructs:
 | Collections | `$#` `$+` `$-` `$~` `$?` `$[..]` |
 | Modules | `<#` `#` `#>` `::` `.` `<=` |
 | Errors | `!?` `:!` `:>` `$!` `$!!` |
-| Data | `#\|expr\|` `expr#?` `e\|x\|` `c\|x\|` `#.N\|x\|` |
+| Data | `#\|expr\|` `expr#?` `#^\|x\|` `#,\|x\|` `#,.N\|x\|` `#^!N\|x\|` |
 | Base | `0b` `0o` `0d` `0x` |
 
 ### Code Snippets

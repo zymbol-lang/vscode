@@ -146,8 +146,14 @@
     "collection-operators": {
       "patterns": [
         {
+          "comment": "Multi-char collection operators — must precede single-char patterns",
           "name": "keyword.operator.collection.zymbol",
-          "match": "\\$[#\\+\\-~\\*\\/\\^<>]"
+          "match": "\\$(?:\\+\\[|\\-\\[|--|\\?\\?|~~|<)"
+        },
+        {
+          "comment": "Single-char collection operators",
+          "name": "keyword.operator.collection.zymbol",
+          "match": "\\$[#\\+\\-~\\?\\[<>|]"
         }
       ]
     },
@@ -187,7 +193,7 @@
       "patterns": [
         {
           "name": "keyword.operator.format.scientific.zymbol",
-          "begin": "\\be\\|",
+          "begin": "#\\^(?:[.!][0-9]+)?\\|",
           "end": "\\|",
           "patterns": [
             { "include": "$self" }
@@ -195,7 +201,7 @@
         },
         {
           "name": "keyword.operator.format.comma.zymbol",
-          "begin": "\\bc\\|",
+          "begin": "#,(?:[.!][0-9]+)?\\|",
           "end": "\\|",
           "patterns": [
             { "include": "$self" }
