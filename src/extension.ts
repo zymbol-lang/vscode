@@ -1,14 +1,19 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 // Intentar cargar el cliente LSP de forma opcional
 let LanguageClient: any;
 let TransportKind: any;
+let State: any;
 let lspAvailable = false;
 
 try {
     const lspModule = require('vscode-languageclient/node');
     LanguageClient = lspModule.LanguageClient;
     TransportKind = lspModule.TransportKind;
+    State = lspModule.State;
     lspAvailable = true;
 } catch (e) {
     console.log('vscode-languageclient not available, LSP features disabled');
@@ -81,8 +86,60 @@ const symbolDocumentation: Record<string, string> = {
 // Language client instance
 let client: any | undefined;
 
+// Status bar item for LSP server state
+let statusBarItem: vscode.StatusBarItem | undefined;
+
 // Terminal instance for running files
 let zymbolTerminal: vscode.Terminal | undefined;
+
+function updateStatusBar(text: string, tooltip?: string): void {
+    if (!statusBarItem) { return; }
+    statusBarItem.text = text;
+    statusBarItem.tooltip = tooltip ?? 'Zymbol Analyser — click for status';
+    statusBarItem.show();
+}
+
+/**
+ * Locate the zymbol-lsp binary by searching common install locations.
+ * Falls back to the configured value (for PATH-based lookup).
+ */
+function findServerPath(): string {
+    const config = vscode.workspace.getConfiguration('zymbol-lang');
+    const configuredPath = config.get<string>('lspPath', 'zymbol-lsp');
+
+    // If the user gave an explicit absolute path and it exists, trust it
+    if (path.isAbsolute(configuredPath) && fs.existsSync(configuredPath)) {
+        return configuredPath;
+    }
+
+    const home = os.homedir();
+    const candidates: string[] = [
+        path.join(home, '.cargo', 'bin', 'zymbol-lsp'),
+        path.join(home, '.local', 'bin', 'zymbol-lsp'),
+        '/usr/local/bin/zymbol-lsp',
+        '/usr/bin/zymbol-lsp',
+    ];
+
+    // Development workspace paths
+    const workspaceFolders = vscode.workspace.workspaceFolders ?? [];
+    for (const folder of workspaceFolders) {
+        const base = folder.uri.fsPath;
+        candidates.push(
+            path.join(base, '..', 'interpreter', 'target', 'release', 'zymbol-lsp'),
+            path.join(base, 'interpreter', 'target', 'release', 'zymbol-lsp'),
+            path.join(base, 'target', 'release', 'zymbol-lsp'),
+        );
+    }
+
+    for (const candidate of candidates) {
+        if (fs.existsSync(candidate)) {
+            return candidate;
+        }
+    }
+
+    // Fallback: let the OS resolve it from PATH
+    return configuredPath;
+}
 
 /**
  * Document formatting provider for Zymbol-Lang (fallback when LSP is not available)
@@ -274,38 +331,42 @@ function registerRunCommand(context: vscode.ExtensionContext): vscode.Disposable
 function startLanguageClient(context: vscode.ExtensionContext): void {
     if (!lspAvailable) {
         console.log('LSP module not available, skipping');
+        updateStatusBar('$(circle-slash) Zymbol', 'Zymbol Analyser: LSP module not available');
         return;
     }
 
     const config = vscode.workspace.getConfiguration('zymbol-lang');
-    const lspPath = config.get<string>('lspPath', 'zymbol-lsp');
     const enableLsp = config.get<boolean>('enableLsp', true);
 
     if (!enableLsp) {
         console.log('Zymbol-Lang LSP is disabled');
+        updateStatusBar('$(circle-slash) Zymbol', 'Zymbol Analyser: disabled in settings');
         return;
     }
 
+    const serverPath = findServerPath();
+
+    updateStatusBar('$(sync~spin) Zymbol', 'Zymbol Analyser: starting…');
+
     try {
-        // Server options - run the zymbol-lsp executable
         const serverOptions = {
             run: {
-                command: lspPath,
+                command: serverPath,
                 transport: TransportKind.stdio
             },
             debug: {
-                command: lspPath,
+                command: serverPath,
                 transport: TransportKind.stdio,
                 options: {
                     env: {
                         ...process.env,
-                        RUST_LOG: 'zymbol_lsp=debug'
+                        RUST_LOG: 'zymbol_lsp=debug',
+                        RUST_BACKTRACE: '1'
                     }
                 }
             }
         };
 
-        // Client options
         const clientOptions = {
             documentSelector: [{ scheme: 'file', language: 'zymbol' }],
             synchronize: {
@@ -314,7 +375,6 @@ function startLanguageClient(context: vscode.ExtensionContext): void {
             outputChannelName: 'Zymbol-Lang LSP'
         };
 
-        // Create the language client
         client = new LanguageClient(
             'zymbol-lsp',
             'Zymbol-Lang Language Server',
@@ -322,15 +382,25 @@ function startLanguageClient(context: vscode.ExtensionContext): void {
             clientOptions
         );
 
-        // Start the client (non-blocking)
+        // Track server state in the status bar
+        client.onDidChangeState((event: any) => {
+            if (State && event.newState === State.Running) {
+                updateStatusBar('$(check) Zymbol', `Zymbol Analyser: running (${serverPath})`);
+            } else if (State && event.newState === State.Stopped) {
+                updateStatusBar('$(circle-slash) Zymbol', 'Zymbol Analyser: stopped');
+            }
+        });
+
         client.start().then(() => {
             console.log('Zymbol-Lang Language Server started');
         }).catch((error: any) => {
             console.error('Failed to start Zymbol-Lang Language Server:', error);
+            updateStatusBar('$(error) Zymbol', `Zymbol Analyser: failed to start — ${error}`);
             client = undefined;
         });
     } catch (error) {
         console.error('Error creating LSP client:', error);
+        updateStatusBar('$(error) Zymbol', `Zymbol Analyser: error — ${error}`);
         client = undefined;
     }
 }
@@ -346,14 +416,67 @@ function registerRestartCommand(context: vscode.ExtensionContext): vscode.Dispos
         }
 
         try {
+            updateStatusBar('$(sync~spin) Zymbol', 'Zymbol Analyser: restarting…');
             if (client) {
                 await client.stop();
                 client = undefined;
             }
             startLanguageClient(context);
-            vscode.window.showInformationMessage('Zymbol-Lang Language Server restarted');
+            vscode.window.showInformationMessage('Zymbol Analyser: server restarted');
         } catch (error) {
+            updateStatusBar('$(error) Zymbol', `Zymbol Analyser: restart failed — ${error}`);
             vscode.window.showErrorMessage('Failed to restart Language Server');
+        }
+    });
+}
+
+/**
+ * Register stop server command
+ */
+function registerStopCommand(): vscode.Disposable {
+    return vscode.commands.registerCommand('zymbol-lang.stopServer', async () => {
+        if (client) {
+            try {
+                await client.stop();
+                client = undefined;
+                updateStatusBar('$(circle-slash) Zymbol', 'Zymbol Analyser: stopped');
+                vscode.window.showInformationMessage('Zymbol Analyser: server stopped');
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to stop Language Server: ${error}`);
+            }
+        } else {
+            vscode.window.showInformationMessage('Zymbol Analyser: server is not running');
+        }
+    });
+}
+
+/**
+ * Register server status command (shown when clicking the status bar item)
+ */
+function registerStatusCommand(): vscode.Disposable {
+    return vscode.commands.registerCommand('zymbol-lang.serverStatus', async () => {
+        const serverPath = findServerPath();
+        const isRunning = client !== undefined;
+        const serverExists = fs.existsSync(serverPath);
+
+        const statusLines = [
+            `**Zymbol Analyser**`,
+            ``,
+            `Server: \`${serverPath}\``,
+            `Binary found: ${serverExists ? '$(check)' : '$(error) not found'}`,
+            `Status: ${isRunning ? '$(check) running' : '$(circle-slash) stopped'}`,
+        ];
+
+        const action = await vscode.window.showInformationMessage(
+            statusLines.filter(l => !l.startsWith('**') && l !== '').join('  |  ').replace(/\$\(\w[\w~]*\)\s*/g, ''),
+            isRunning ? 'Restart' : 'Start',
+            isRunning ? 'Stop' : undefined as any
+        );
+
+        if (action === 'Restart' || action === 'Start') {
+            vscode.commands.executeCommand('zymbol-lang.restartServer');
+        } else if (action === 'Stop') {
+            vscode.commands.executeCommand('zymbol-lang.stopServer');
         }
     });
 }
@@ -386,6 +509,14 @@ function registerFormatCommand(): vscode.Disposable {
 export function activate(context: vscode.ExtensionContext) {
     console.log('Zymbol-Lang extension is now active');
 
+    // Create status bar item (always visible when a .zy file is open)
+    statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 10);
+    statusBarItem.command = 'zymbol-lang.serverStatus';
+    statusBarItem.tooltip = 'Zymbol Analyser — click for status';
+    statusBarItem.text = '$(sync~spin) Zymbol';
+    statusBarItem.show();
+    context.subscriptions.push(statusBarItem);
+
     // Register hover provider FIRST (always works)
     const hoverProvider = vscode.languages.registerHoverProvider(
         { language: 'zymbol', scheme: 'file' },
@@ -402,8 +533,13 @@ export function activate(context: vscode.ExtensionContext) {
     const runCommand = registerRunCommand(context);
     const restartCommand = registerRestartCommand(context);
     const formatCommand = registerFormatCommand();
+    const statusCommand = registerStatusCommand();
+    const stopCommand = registerStopCommand();
 
-    context.subscriptions.push(hoverProvider, formattingProvider, runCommand, restartCommand, formatCommand);
+    context.subscriptions.push(
+        hoverProvider, formattingProvider,
+        runCommand, restartCommand, formatCommand, statusCommand, stopCommand
+    );
 
     // Start the language server AFTER commands are registered (non-blocking)
     startLanguageClient(context);
@@ -431,6 +567,7 @@ export function activate(context: vscode.ExtensionContext) {
  * Extension deactivation
  */
 export async function deactivate(): Promise<void> {
+    statusBarItem?.hide();
     if (client) {
         try {
             await client.stop();

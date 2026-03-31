@@ -79,6 +79,16 @@
         "category": "Zymbol-Lang"
       },
       {
+        "command": "zymbol-lang.stopServer",
+        "title": "Stop Language Server",
+        "category": "Zymbol-Lang"
+      },
+      {
+        "command": "zymbol-lang.serverStatus",
+        "title": "Show Analyser Status",
+        "category": "Zymbol-Lang"
+      },
+      {
         "command": "zymbol-lang.formatDocument",
         "title": "Format Document",
         "category": "Zymbol-Lang"
@@ -177,9 +187,7 @@
   "capabilities": {
     "documentFormattingProvider": "true"
   },
-  "activationEvents": [
-    "onLanguage:zymbol"
-  ],
+  "activationEvents": [],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
