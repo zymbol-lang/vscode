@@ -1,0 +1,51 @@
+name: Build and release VSIX
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to upload to (e.g. v0.1.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-vsix:
+    name: Build VSIX and upload to release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Compile TypeScript
+        run: npm run compile
+
+      - name: Package VSIX
+        run: |
+          VERSION=$(node -pe "require('./package.json').version")
+          npx @vscode/vsce package -o "zymbol-lang-${VERSION}.vsix"
+          echo "ASSET=zymbol-lang-${VERSION}.vsix" >> "$GITHUB_ENV"
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+
+      - name: Compute SHA256
+        run: sha256sum "$ASSET" | tee "SHA256_vsix.txt"
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.event.release.tag_name || inputs.tag }}"
+          gh release upload "$TAG" "$ASSET" SHA256_vsix.txt --clobber
