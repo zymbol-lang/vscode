@@ -26,9 +26,13 @@ fi
 echo "📦 Installing dependencies..."
 npm install
 
-# Compile TypeScript
-echo "🔨 Compiling TypeScript..."
+# Type-check TypeScript (no output, catches errors early)
+echo "🔍 Type-checking TypeScript..."
 npm run compile
+
+# Bundle extension (replaces node_modules at runtime with a single file)
+echo "📦 Bundling extension..."
+npm run bundle
 
 # Package extension
 echo "📦 Packaging extension..."

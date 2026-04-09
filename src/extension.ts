@@ -100,46 +100,76 @@ function updateStatusBar(text: string, tooltip?: string): void {
 }
 
 /**
- * Locate the zymbol-lsp binary by searching common install locations.
- * Falls back to the configured value (for PATH-based lookup).
+ * Locate the Zymbol server executable and decide how to invoke it.
+ *
+ * Returns `{ command, args }` where:
+ *  - `zymbol lsp`    — preferred (one binary to install, cross-platform)
+ *  - `zymbol-lsp`    — legacy standalone binary (kept for compatibility)
+ *
+ * Search order:
+ *  1. Explicit `lspPath` setting (treated as the full binary path, no extra args)
+ *  2. `zymbol` binary in common locations → invoked as `zymbol lsp`
+ *  3. `zymbol-lsp` binary in common locations (legacy)
+ *  4. PATH fallback: `zymbol lsp`
  */
-function findServerPath(): string {
+function findServer(): { command: string; args: string[] } {
     const config = vscode.workspace.getConfiguration('zymbol-lang');
-    const configuredPath = config.get<string>('lspPath', 'zymbol-lsp');
+    const configuredPath = config.get<string>('lspPath', '');
 
-    // If the user gave an explicit absolute path and it exists, trust it
-    if (path.isAbsolute(configuredPath) && fs.existsSync(configuredPath)) {
-        return configuredPath;
+    // Explicit absolute path wins (backward compat with old zymbol-lsp installs)
+    if (configuredPath && path.isAbsolute(configuredPath) && fs.existsSync(configuredPath)) {
+        return { command: configuredPath, args: [] };
     }
 
     const home = os.homedir();
-    const candidates: string[] = [
+    const workspaceFolders = vscode.workspace.workspaceFolders ?? [];
+
+    // --- Preferred: zymbol binary + lsp subcommand ---
+    const zymbolCandidates: string[] = [
+        path.join(home, '.cargo', 'bin', 'zymbol'),
+        path.join(home, '.local', 'bin', 'zymbol'),
+        '/usr/local/bin/zymbol',
+        '/usr/bin/zymbol',
+    ];
+    for (const folder of workspaceFolders) {
+        const base = folder.uri.fsPath;
+        zymbolCandidates.push(
+            path.join(base, '..', 'interpreter', 'target', 'release', 'zymbol'),
+            path.join(base, 'interpreter', 'target', 'release', 'zymbol'),
+            path.join(base, 'target', 'release', 'zymbol'),
+        );
+    }
+    for (const candidate of zymbolCandidates) {
+        if (fs.existsSync(candidate)) {
+            return { command: candidate, args: ['lsp'] };
+        }
+    }
+
+    // --- Legacy fallback: standalone zymbol-lsp binary ---
+    const lspCandidates: string[] = [
         path.join(home, '.cargo', 'bin', 'zymbol-lsp'),
         path.join(home, '.local', 'bin', 'zymbol-lsp'),
         '/usr/local/bin/zymbol-lsp',
         '/usr/bin/zymbol-lsp',
     ];
-
-    // Development workspace paths
-    const workspaceFolders = vscode.workspace.workspaceFolders ?? [];
     for (const folder of workspaceFolders) {
         const base = folder.uri.fsPath;
-        candidates.push(
+        lspCandidates.push(
             path.join(base, '..', 'interpreter', 'target', 'release', 'zymbol-lsp'),
             path.join(base, 'interpreter', 'target', 'release', 'zymbol-lsp'),
             path.join(base, 'target', 'release', 'zymbol-lsp'),
         );
     }
-
-    for (const candidate of candidates) {
+    for (const candidate of lspCandidates) {
         if (fs.existsSync(candidate)) {
-            return candidate;
+            return { command: candidate, args: [] };
         }
     }
 
-    // Fallback: let the OS resolve it from PATH
-    return configuredPath;
+    // PATH fallback — prefer zymbol lsp
+    return { command: 'zymbol', args: ['lsp'] };
 }
+
 
 /**
  * Document formatting provider for Zymbol-Lang (fallback when LSP is not available)
@@ -344,18 +374,20 @@ function startLanguageClient(context: vscode.ExtensionContext): void {
         return;
     }
 
-    const serverPath = findServerPath();
+    const { command: serverCommand, args: serverArgs } = findServer();
 
     updateStatusBar('$(sync~spin) Zymbol', 'Zymbol Analyser: starting…');
 
     try {
         const serverOptions = {
             run: {
-                command: serverPath,
+                command: serverCommand,
+                args: serverArgs,
                 transport: TransportKind.stdio
             },
             debug: {
-                command: serverPath,
+                command: serverCommand,
+                args: serverArgs,
                 transport: TransportKind.stdio,
                 options: {
                     env: {
@@ -385,7 +417,7 @@ function startLanguageClient(context: vscode.ExtensionContext): void {
         // Track server state in the status bar
         client.onDidChangeState((event: any) => {
             if (State && event.newState === State.Running) {
-                updateStatusBar('$(check) Zymbol', `Zymbol Analyser: running (${serverPath})`);
+                updateStatusBar('$(check) Zymbol', `Zymbol Analyser: running (${serverCommand} ${serverArgs.join(' ')})`);
             } else if (State && event.newState === State.Stopped) {
                 updateStatusBar('$(circle-slash) Zymbol', 'Zymbol Analyser: stopped');
             }
@@ -455,14 +487,17 @@ function registerStopCommand(): vscode.Disposable {
  */
 function registerStatusCommand(): vscode.Disposable {
     return vscode.commands.registerCommand('zymbol-lang.serverStatus', async () => {
-        const serverPath = findServerPath();
+        const { command: serverCommand, args: serverArgs } = findServer();
+        const serverLabel = serverArgs.length > 0
+            ? `${serverCommand} ${serverArgs.join(' ')}`
+            : serverCommand;
         const isRunning = client !== undefined;
-        const serverExists = fs.existsSync(serverPath);
+        const serverExists = fs.existsSync(serverCommand);
 
         const statusLines = [
             `**Zymbol Analyser**`,
             ``,
-            `Server: \`${serverPath}\``,
+            `Server: \`${serverLabel}\``,
             `Binary found: ${serverExists ? '$(check)' : '$(error) not found'}`,
             `Status: ${isRunning ? '$(check) running' : '$(circle-slash) stopped'}`,
         ];

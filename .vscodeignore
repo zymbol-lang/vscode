@@ -1,0 +1,18 @@
+# Source and build artifacts not needed at runtime
+src/**
+out/**
+node_modules/**
+
+# Dev tooling
+.github/**
+.vscode/**
+.vscode-test/**
+tsconfig.json
+build-extension.sh
+install-lsp.sh
+*.vsix
+
+# Misc
+.gitignore
+.eslintrc*
+.prettierrc*
