@@ -111,9 +111,9 @@
     "numeral-mode": {
       "patterns": [
         {
-          "comment": "Mode-switch token: #d0d9# where d0/d9 are the 0 and 9 digits of any Unicode numeral block.",
+          "comment": "Mode-switch token: #d0d9# where d0/d9 are the 0 and 9 digits of any Unicode numeral block, including Klingon pIqaD PUA digits U+F8F0–U+F8F9 which have no \\p{Nd} category.",
           "name": "keyword.control.numeral-mode.zymbol",
-          "match": "#\\p{Nd}\\p{Nd}#"
+          "match": "#(?:\\p{Nd}|[\\uF8F0-\\uF8F9])(?:\\p{Nd}|[\\uF8F0-\\uF8F9])#"
         }
       ]
     },
@@ -471,17 +471,18 @@
     "function-calls": {
       "patterns": [
         {
-          "comment": "Function call: identifier immediately followed by (",
+          "comment": "Mirrors the Zymbol lexer: any char that is NOT whitespace, NOT a Unicode decimal digit (\\p{Nd}), and NOT one of the 25 operator chars is a valid identifier start. Continuation allows digits too. This naturally covers every script, emoji, Klingon pIqaD PUA, and any future fictional language without listing Unicode ranges.",
           "name": "entity.name.function.zymbol",
-          "match": "[a-zA-Z_\\u00C0-\\u024F\\u1E00-\\u1EFF\\u0370-\\u03FF\\u0400-\\u04FF\\u0600-\\u06FF\\u0900-\\u097F\\u4E00-\\u9FFF\\u3040-\\u309F\\u30A0-\\u30FF\\uAC00-\\uD7AF\\uD800-\\uDFFF][a-zA-Z0-9_\\u00C0-\\u024F\\u1E00-\\u1EFF\\u0370-\\u03FF\\u0400-\\u04FF\\u0600-\\u06FF\\u0900-\\u097F\\u4E00-\\u9FFF\\u3040-\\u309F\\u30A0-\\u30FF\\uAC00-\\uD7AF\\uD800-\\uDFFF]*(?=\\s*\\()"
+          "match": "[^\\s\\p{Nd}\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\][^\\s\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\]*(?=\\s*\\()"
         }
       ]
     },
     "identifiers": {
       "patterns": [
         {
+          "comment": "Same exclusion logic as function-calls but without the lookahead. Covers all Unicode scripts, emoji, Klingon pIqaD, and fictional languages.",
           "name": "variable.other.zymbol",
-          "match": "[a-zA-Z_\\u00C0-\\u024F\\u1E00-\\u1EFF\\u0370-\\u03FF\\u0400-\\u04FF\\u0600-\\u06FF\\u0900-\\u097F\\u4E00-\\u9FFF\\u3040-\\u309F\\u30A0-\\u30FF\\uAC00-\\uD7AF\\uD800-\\uDFFF][a-zA-Z0-9_\\u00C0-\\u024F\\u1E00-\\u1EFF\\u0370-\\u03FF\\u0400-\\u04FF\\u0600-\\u06FF\\u0900-\\u097F\\u4E00-\\u9FFF\\u3040-\\u309F\\u30A0-\\u30FF\\uAC00-\\uD7AF\\uD800-\\uDFFF]*"
+          "match": "[^\\s\\p{Nd}\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\][^\\s\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\]*"
         }
       ]
     }
