@@ -9,6 +9,7 @@
     { "include": "#numeral-mode" },
     { "include": "#numbers" },
     { "include": "#booleans" },
+    { "include": "#numeric-casts" },
     { "include": "#error-types" },
     { "include": "#bash-exec" },
     { "include": "#script-exec" },
@@ -122,6 +123,15 @@
         {
           "name": "constant.language.boolean.zymbol",
           "match": "#[01]\\b"
+        }
+      ]
+    },
+    "numeric-casts": {
+      "patterns": [
+        {
+          "comment": "Numeric cast operators — must precede error-types (## prefix)",
+          "name": "keyword.operator.cast.zymbol",
+          "match": "##\\.|###|##!"
         }
       ]
     },
@@ -276,12 +286,12 @@
         {
           "comment": "Multi-char collection operators — must precede single-char patterns",
           "name": "keyword.operator.collection.zymbol",
-          "match": "\\$(?:\\+\\[|\\-\\[|--|\\?\\?|~~|<|!!)"
+          "match": "\\$(?:\\+\\+|\\+\\[|\\-\\[|--|\\?\\?|~~|/|<|!!)"
         },
         {
           "comment": "Single-char collection operators",
           "name": "keyword.operator.collection.zymbol",
-          "match": "\\$[#\\+\\-~\\?\\[<>|!]"
+          "match": "\\$[#\\+\\-~\\?\\[<>|!/]"
         }
       ]
     },

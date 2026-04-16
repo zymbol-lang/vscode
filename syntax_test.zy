@@ -1,0 +1,960 @@
+// =============================================================================
+// Zymbol Syntax Coverage Test  — vscode/syntax_test.zy
+// Covers every construct from MANUAL.md + zymbol-lang.ebnf.
+// Run:  zymbol run vscode/syntax_test.zy
+// =============================================================================
+
+// Import must come before any statement (grammar requirement)
+<# ./test_module <= m
+
+
+// =============================================================================
+// COMMENTS
+// =============================================================================
+
+// Line comment — should be dimmed/italic
+
+/* Block comment — (parens) [brackets] {braces} inside are colored by VS Code's
+   bracket-colorizer independently of this grammar. That is expected.          */
+
+
+// =============================================================================
+// BOOLEANS  (#1  #0)
+// =============================================================================
+
+b_true  = #1
+b_false = #0
+>> b_true " " b_false ¶
+
+
+// =============================================================================
+// NUMERAL MODE  (#09#  #०९#  #๐๙#)
+// =============================================================================
+
+#09#            // ASCII  — reset / default
+>> 42 ¶         // → 42
+
+#०९#            // Devanagari
+>> 42 ¶         // → ४२
+
+#๐๙#            // Thai
+>> 42 ¶         // → ๔๒
+
+#09#            // back to ASCII
+
+
+// =============================================================================
+// NUMBERS
+// =============================================================================
+
+n_int   = 42
+n_neg   = -7
+n_float = 3.14
+n_sci1  = 1.5e10
+n_sci2  = 2.0E-3
+n_sci3  = 9e4
+>> n_int " " n_neg " " n_float " " n_sci1 ' ' n_sci2 ' ' n_sci3 ¶
+
+
+// =============================================================================
+// BASE LITERALS  (bare values)
+// =============================================================================
+
+lit_bin = 0b01000001    // → 'A'
+lit_oct = 0o101         // → 'A'
+lit_dec = 0d65          // → 'A'
+lit_hex = 0x41          // → 'A'
+>> lit_bin " " lit_oct " " lit_dec " " lit_hex ¶
+
+
+// =============================================================================
+// STRINGS  (interpolation + escapes)
+// =============================================================================
+
+greeting = "World"
+s1 = "Hello, {greeting}!"
+s2 = "Tab:\t  Quote:\"  Slash:\\"
+s3 = "Unicode: \u{1F600}"
+s4 = "Literal brace: \{"
+>> s1 ¶
+>> s2 ¶
+>> s3 ¶
+
+
+// =============================================================================
+// CHARS
+// =============================================================================
+
+c1 = 'A'
+c2 = '\n'
+c3 = 0x41    // same as 'A' via base literal
+>> c1 " " c3 ¶
+
+
+// =============================================================================
+// CONST DECLARATION  (:=)
+// =============================================================================
+
+PI    := 3.14159
+LIMIT := 100
+MSG   := "Welcome, {greeting}"        // string interpolation
+>> PI " " LIMIT ¶
+>> MSG ¶
+
+
+// =============================================================================
+// ASSIGNMENT  (=)   +  COMMA CONCAT
+// =============================================================================
+
+x    = 10
+name = "Ana"
+full = "Hello, {name}!"               // string interpolation
+>> full ¶
+
+
+// =============================================================================
+// COMPOUND ASSIGNMENT  (+= -= *= /= %= ^=  ++  --)
+// =============================================================================
+
+n = 10
+n += 5    // 15
+n -= 2    // 13
+n *= 2    // 26
+n /= 2    // 13
+n %= 5    // 3
+n ^= 2    // 9
+n++       // 10
+n--       // 9
+>> n ¶    // → 9
+
+
+// =============================================================================
+// OPERATORS
+// =============================================================================
+
+// Exponentiation  (^)
+pow_r = 2 ^ 10
+>> pow_r ¶    // → 1024
+
+// Arithmetic
+>> 3 + 4 ¶
+>> 9 - 2 ¶
+>> 3 * 4 ¶
+>> 8 / 2 ¶
+>> 10 % 3 ¶
+
+// Equality  (==  <>)
+>> (1 == 1) ¶
+>> (1 <> 2) ¶
+
+// Comparison
+>> (3 < 5) ¶
+>> (5 > 3) ¶
+>> (3 <= 3) ¶
+>> (5 >= 5) ¶
+
+// Logical  (&& || !)
+>> (#1 && #0) ¶
+>> (#1 || #0) ¶
+>> (!#0) ¶
+
+// Range  (..  step :)  — only valid inside for-each loops (@ var:start..end:step)
+// 1..5    5..1    1..9:2   (see LOOPS section for examples)
+
+
+// =============================================================================
+// OUTPUT / INPUT / CLI ARGS
+// =============================================================================
+
+>> "Hello" ¶                          // with newline via pilcrow
+>> "Hello" \\                         // newline via double backslash
+>> ¶                                  // blank line
+>> x " is " n_int ¶                  // multiple items by juxtaposition
+
+
+// =============================================================================
+// LIFETIME END  (\identifier)
+// =============================================================================
+
+tmp_var = 99
+\ tmp_var                             // explicitly drops tmp_var from scope
+
+
+// =============================================================================
+// CONDITIONAL  (?  _?  _)
+// =============================================================================
+
+score = 75
+
+? score >= 90 {
+    >> "A" ¶
+} _? score >= 80 {
+    >> "B" ¶
+} _? score >= 70 {
+    >> "C" ¶
+} _ {
+    >> "F" ¶
+}
+// → C
+
+
+// =============================================================================
+// MATCH  (??)  — as statement and as expression
+// =============================================================================
+
+// Match as expression (assigns result to variable)
+grade = ?? score {
+    90..100 : 'A'
+    80..89  : 'B'
+    70..79  : 'C'
+    60..69  : 'D'
+    _       : 'F'
+}
+>> grade ¶    // → C
+
+// Guard pattern:  _? condition  (wildcard guard — most common)
+temperature = -5
+state = ?? temperature {
+    _? temperature < 0  : "ice"
+    _? temperature < 20 : "cold"
+    _? temperature < 35 : "warm"
+    _                   : "hot"
+}
+>> state ¶    // → ice
+
+// Guard pattern:  literal ? condition  (pattern guard — literal + extra check)
+val = 7
+desc = ?? val {
+    0         : "zero"
+    1 ? #1    : "one (always)"       // literal 1 with guard condition
+    _? val < 5: "small"
+    _         : "other"
+}
+>> desc ¶    // → other
+
+// List pattern  [p1, p2, ...]  and empty list []
+arr_pat = [1, 2, 3]
+?? arr_pat {
+    []        : { >> "empty" ¶ }
+    [_, _]    : { >> "two elements" ¶ }
+    [1, _, _] : { >> "starts with 1" ¶ }
+    _         : { >> "other list" ¶ }
+}
+// → starts with 1
+
+// Match on strings
+color = "red"
+code = ?? color {
+    "red"   : "#FF0000"
+    "green" : "#00FF00"
+    "blue"  : "#0000FF"
+    _       : "#000000"
+}
+>> code ¶    // → #FF0000
+
+// Match as statement (block arms)
+n_val = 42
+?? n_val {
+    0 : { >> "zero" ¶ }
+    _? n_val < 0 : { >> "negative" ¶ }
+    _ : { >> "positive: " n_val ¶ }
+}
+
+
+// =============================================================================
+// LOOPS  (@  @!  @>  labeled)
+// =============================================================================
+
+// Range loop (inclusive on both ends)
+@ i:1..5 {
+    >> i " "
+}
+>> ¶    // → 1 2 3 4 5
+
+// Range with step
+@ i:1..9:2 {
+    >> i " "
+}
+>> ¶    // → 1 3 5 7 9
+
+// Reverse range
+@ i:5..1:1 {
+    >> i " "
+}
+>> ¶    // → 5 4 3 2 1
+
+// While loop
+w = 1
+@ w <= 8 {
+    w *= 2
+}
+>> w ¶    // → 16
+
+// For-each over array
+fruits = ["apple", "pear", "grape"]
+@ fruit:fruits {
+    >> "- " fruit ¶
+}
+
+// For-each over string (char by char)
+@ c:"hi" {
+    >> c "-"
+}
+>> ¶    // → h-i-
+
+// Infinite loop with break
+count = 0
+@ {
+    count++
+    ? count >= 3 { @! }
+}
+>> count ¶    // → 3
+
+// Labeled infinite loop
+outer_n = 0
+@outer {
+    outer_n++
+    ? outer_n >= 3 { @! outer }
+}
+>> outer_n ¶    // → 3
+
+// Labeled nested loops with @! and @>
+found = #0
+@search i:0..4 {
+    @ j:0..4 {
+        ? i + j == 6 {
+            found = #1
+            @! search
+        }
+        @> search
+    }
+}
+>> found ¶    // → #1
+
+
+// =============================================================================
+// FUNCTIONS  (declaration  return <~  output param <~  mutable param ~)
+// =============================================================================
+
+// Simple function with return
+add(a, b) {
+    <~ a + b
+}
+
+// Multiple return paths
+classify(n) {
+    ? n % 15 == 0 { <~ "FizzBuzz" }
+    _? n % 3  == 0 { <~ "Fizz" }
+    _? n % 5  == 0 { <~ "Buzz" }
+    _ { <~ n }
+}
+
+// Output parameter  (<~)  — modifies caller's variable
+increment(counter<~) {
+    counter = counter + 1
+}
+
+// Mutable parameter  (~)  — local copy can be modified inside function
+process(value~) {
+    value = value * 2
+    <~ value
+}
+
+// Multiple output params
+swap(a<~, b<~) {
+    tmp = a
+    a = b
+    b = tmp
+}
+
+>> add(3, 4) ¶        // → 7
+>> classify(15) ¶     // → FizzBuzz
+>> classify(7) ¶      // → 7
+
+counter = 0
+increment(counter)
+>> counter ¶          // → 1
+
+>> process(5) ¶       // → 10
+
+px = 10
+py = 20
+swap(px, py)
+>> "px=" px " py=" py ¶    // → px=20 py=10
+
+// Recursion
+factorial(n) {
+    ? n <= 1 { <~ 1 }
+    <~ n * factorial(n - 1)
+}
+>> factorial(6) ¶    // → 720
+
+// Factory (function returning lambda)
+make_adder(base) { <~ x -> x + base }
+add10 = make_adder(10)
+>> add10(5) ¶    // → 15
+
+
+// =============================================================================
+// LAMBDAS  (->)
+// =============================================================================
+
+double    = x -> x * 2
+multiply  = (a, b) -> a * b
+describe  = x -> {
+    ? x > 0 { <~ "positive" }
+    _? x < 0 { <~ "negative" }
+    <~ "zero"
+}
+
+>> double(7) ¶           // → 14
+>> multiply(3, 4) ¶      // → 12
+>> describe(-3) ¶        // → negative
+
+// Closure (captures outer scope)
+factor = 3
+triple = x -> x * factor
+>> triple(7) ¶    // → 21
+
+// Lambdas as first-class values (stored in array)
+ops = [x -> x + 1, x -> x * 2, x -> x * x]
+>> ops[0](5) ¶    // → 6
+>> ops[1](5) ¶    // → 10
+>> ops[2](5) ¶    // → 25
+
+// Lambda passed as argument directly
+apply(f, v) { <~ f(v) }
+>> apply(x -> x * 3, 7) ¶    // → 21
+
+
+// =============================================================================
+// COLLECTIONS  (array  positional tuple  named tuple)
+// =============================================================================
+
+arr  = [1, 2, 3, 4, 5]
+tup  = (10, 20, 30)
+ntup = (name: "Ana", age: 25)
+
+// Access
+>> arr[0] ¶      // → 1
+>> arr[-1] ¶     // → 5  (negative index)
+>> tup[1] ¶      // → 20
+>> ntup.name ¶   // → Ana
+>> ntup.age ¶    // → 25
+
+
+// --- Collection operators ---
+
+len        = arr$#
+>> len ¶                              // → 5
+
+appended   = arr$+ 6
+>> appended ¶                         // → [1, 2, 3, 4, 5, 6]
+
+inserted   = arr$+[2] 99
+>> inserted ¶                         // → [1, 2, 99, 3, 4, 5]
+
+removed_v  = arr$- 3
+>> removed_v ¶                        // → [1, 2, 4, 5]
+
+removed_all = [1, 2, 3, 2, 4]$-- 2
+>> removed_all ¶                      // → [1, 3, 4]
+
+sliced1    = arr$[1..3]
+>> sliced1 ¶                          // → [2, 3]
+
+sliced2    = arr$[0:3]
+>> sliced2 ¶                          // → [1, 2, 3]
+
+removed_i  = arr$-[0]
+>> removed_i ¶                        // → [2, 3, 4, 5]
+
+removed_r  = arr$-[1..3]
+>> removed_r ¶                        // → [1, 4, 5]
+
+removed_c  = arr$-[1:2]
+>> removed_c ¶                        // → [1, 4, 5]
+
+contains   = arr$? 3
+>> contains ¶                         // → #1
+
+indices    = [1, 2, 1, 3, 1]$?? 1
+>> indices ¶                          // → [0, 2, 4]
+
+sorted_asc = arr$^+
+>> sorted_asc ¶                       // → [1, 2, 3, 4, 5]
+
+sorted_dsc = arr$^-
+>> sorted_dsc ¶                       // → [5, 4, 3, 2, 1]
+
+sorted_cst = arr$^ (a, b) -> a > b
+>> sorted_cst ¶                       // → [5, 4, 3, 2, 1]
+
+mapped     = arr$> (x -> x * 2)
+>> mapped ¶                           // → [2, 4, 6, 8, 10]
+
+filtered   = arr$| (x -> x > 2)
+>> filtered ¶                         // → [3, 4, 5]
+
+reduced    = arr$< (0, (acc, x) -> acc + x)
+>> reduced ¶                          // → 15
+
+updated    = arr[2]$~ 99
+>> updated ¶                          // → [1, 2, 99, 4, 5]
+
+
+// --- Indexed assignment ---
+
+arr[0] = 99
+>> arr ¶                              // → [99, 2, 3, 4, 5]
+
+
+// --- Nested arrays (matrices) ---
+
+matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+>> matrix[1] ¶                        // → [4, 5, 6]
+>> matrix[1][2] ¶                     // → 6
+
+
+// --- Strings as collections ---
+
+s = "hello world"
+>> (s$#) ¶                            // → 11
+>> (s$? "world") ¶                    // → #1
+>> (s$? 'w') ¶                        // → #1  (contains char)
+s_indices = s$?? "l"
+>> s_indices ¶                        // → [2, 3, 9]
+sub1 = s$[0..5]
+>> sub1 ¶                             // → hello
+sub2 = s$[0:5]
+>> sub2 ¶                             // → hello
+
+s_app = s$+ "!"
+>> s_app ¶                            // → hello world!
+
+s_ins = s$+[5] "!!!"
+>> s_ins ¶                            // → hello!!! world
+
+s_rem1 = s$- 'l'
+>> s_rem1 ¶                           // → helo world
+
+s_rem2 = s$-- 'l'
+>> s_rem2 ¶                           // → heo word
+
+s_remi = s$-[0]
+>> s_remi ¶                           // → ello world
+
+s_remr = s$-[0..6]
+>> s_remr ¶                           // → world
+
+replaced = s$~~["l":"L"]
+>> replaced ¶                         // → heLLo worLd
+rep1 = s$~~["l":"L":1]
+>> rep1 ¶                             // → heLlo world
+
+// String split by char (/ operator on string + char)
+parts = "a,b,c,d" / ','
+>> parts ¶                            // → [a, b, c, d]
+
+// String iteration (char by char)
+@ c:"hello" { >> c "-" }
+>> ¶    // → h-e-l-l-o-
+
+
+// =============================================================================
+// DESTRUCTURING  (array  positional tuple  named tuple)
+// =============================================================================
+
+d_arr = [10, 20, 30, 40, 50]
+
+// Array destructuring
+[da, db, dc]     = d_arr        // da=10  db=20  dc=30
+[d_first, *d_rest] = d_arr      // d_first=10  d_rest=[20,30,40,50]
+[dx, _, dz]      = [1, 2, 3]   // dx=1  dz=3
+>> da " " d_first ¶
+
+// Positional tuple destructuring  (*rest not supported in positional tuples)
+d_tup = (100, 200, 300)
+(dpx, dpy) = d_tup              // dpx=100  dpy=200
+>> dpx " " dpy ¶
+
+// Named tuple destructuring
+d_person = (name: "Ana", age: 25, city: "Madrid")
+(name: d_n, age: d_a) = d_person    // d_n="Ana"  d_a=25
+>> d_n " " d_a ¶
+
+
+// =============================================================================
+// PIPE OPERATOR  (|>)
+// =============================================================================
+
+inc = x -> x + 1
+
+r1 = 5 |> double(_)
+>> r1 ¶    // → 10
+
+r2 = 5 |> (x -> x * 3)(_)
+>> r2 ¶    // → 15
+
+// With extra arguments (using lambda — declared functions are not first-class in pipe)
+add_fn = (a, b) -> a + b
+r3 = 10 |> add_fn(_, 5)    // _ in first position
+>> r3 ¶    // → 15
+
+r3b = 5 |> add_fn(2, _)    // _ in second position
+>> r3b ¶   // → 7
+
+// Chained pipe
+r4 = 5 |> double(_) |> inc(_) |> double(_)
+>> r4 ¶    // → 22  (5→10→11→22)
+
+
+// =============================================================================
+// DATA OPERATORS  (#?  #|..|)
+// =============================================================================
+
+meta_int   = 42#?
+>> meta_int ¶       // → (###, 2, 42)
+
+meta_float = 3.14#?
+>> meta_float ¶     // → (##., 4, 3.14)
+
+meta_str   = "hello"#?
+>> meta_str ¶       // → (##", 5, hello)
+
+num_eval1  = #|"42"|
+>> num_eval1 ¶      // → 42
+
+num_eval2  = #|"3.14"|
+>> num_eval2 ¶      // → 3.14
+
+num_pass   = #|99|
+>> num_pass ¶       // → 99
+
+
+// =============================================================================
+// FORMAT EXPRESSIONS  (#,  #^  #.N  #!N)
+// =============================================================================
+
+// Thousands separator
+>> #,|1234567| ¶              // → 1,234,567
+>> #,.2|123456.789| ¶         // → 123,456.79
+>> #,!2|123456.789| ¶         // → 123,456.78
+
+// Scientific notation
+>> #^|12345.678| ¶            // → 1.2345678e4
+>> #^.3|12345.678| ¶          // → 1.235e4
+>> #^!3|12345.678| ¶          // → 1.234e4
+
+// Precision: round (#.N) and truncate (#!N)
+pi_val = 3.14159265
+>> #.2|pi_val| ¶              // → 3.14
+>> #.4|pi_val| ¶              // → 3.1416
+>> #!2|pi_val| ¶              // → 3.14
+
+// Base conversion expressions
+>> 0b|65| ¶                   // → 0b1000001
+>> 0o|8| ¶                    // → 0o10
+>> 0d|255| ¶                  // → 0d0255
+>> 0x|255| ¶                  // → 0x00FF
+
+
+// =============================================================================
+// ERROR HANDLING  (!?  :!  :>  ##type   $!  $!!)
+// =============================================================================
+
+// Try with typed catch + finally
+!? {
+    x_err = 10 / 0
+} :! ##Div {
+    >> "division by zero caught" ¶
+} :! ##IO {
+    >> "IO error" ¶
+} :! {
+    >> "other: " _err ¶       // bare catch — no ##type = catch-all
+} :> {
+    >> "finally runs" ¶
+}
+
+// Typed catch — index out of bounds
+!? {
+    bad_arr = [1, 2, 3]
+    bad_v = bad_arr[10]
+} :! ##Index {
+    >> "index out of bounds" ¶
+}
+
+// $! — check if value is an error
+safe_val = 42
+>> (safe_val$!) ¶    // → #0
+
+// $!! — propagate error to caller (only inside named functions)
+// Shown as comment — $!! is only meaningful on a value that IS an error:
+// process(v) { v$!! }   — propagates v up if v is an error value
+
+// Nested try blocks
+!? {
+    !? {
+        bad_n = 10 / 0
+    } :! ##Div {
+        >> "inner: div zero" ¶
+    }
+    >> "continues after inner try" ¶
+} :! {
+    >> "outer error" ¶
+}
+
+
+// =============================================================================
+// HIGHER-ORDER FUNCTIONS
+// =============================================================================
+
+nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+doubled = nums$> (x -> x * 2)
+>> doubled ¶    // → [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+
+evens = nums$| (x -> x % 2 == 0)
+>> evens ¶      // → [2, 4, 6, 8, 10]
+
+total = nums$< (0, (acc, x) -> acc + x)
+>> total ¶      // → 55
+
+// Named functions inside HOF (must be wrapped in lambda)
+is_big(val) { <~ val > 5 }
+big_doubled = nums$| (x -> is_big(x))
+>> big_doubled ¶    // → [6, 7, 8, 9, 10]
+
+// Reduce with block lambda
+data = [3, 1, 4, 1, 5, 9, 2, 6]
+maximum = data$< (data[0], (mx, xv) -> {
+    ? xv > mx { <~ xv }
+    <~ mx
+})
+>> maximum ¶    // → 9
+
+// Chaining via intermediate variables
+step1 = nums$| (x -> x > 3)
+step2 = step1$> (x -> x * x)
+>> step2 ¶    // → [16, 25, 36, 49, 64, 81, 100]
+
+// Sort named tuple array by field
+db = [
+    (name: "Carla", age: 28),
+    (name: "Ana",   age: 25),
+    (name: "Bob",   age: 30)
+]
+by_age = db$^ (a, b) -> a.age < b.age
+>> by_age[0].name ¶    // → Ana
+
+
+// =============================================================================
+// MODULE SYSTEM  (#name  #>  <#  ::  <=)
+// =============================================================================
+
+// Module declaration (first line of a module file):  # module_name
+// Export block (before definitions):
+// # test_module
+// #> {
+//     add_nums,
+//     greet <= publicGreet,     // renamed export
+//     get_version
+// }
+
+// Import (declared at top of file — see line 7):  <# ./test_module <= m
+
+// Namespaced function call via ::
+mod_r1 = m::add_nums(10, 5)
+>> mod_r1 ¶                         // → 15
+
+mod_r2 = m::greet("Zymbol")
+>> mod_r2 ¶                         // → Hello, Zymbol!
+
+mod_ver = m::get_version()
+>> "version: " mod_ver ¶            // → version: 1.0
+
+// Scope resolution form:  alias::function(args)
+mod_r3 = m::add_nums(3, 7)
+>> mod_r3 ¶                         // → 10
+
+
+// =============================================================================
+// SHELL INTEGRATION  (<\  \>  </  />)
+// =============================================================================
+
+// Bash execution — captures stdout + stderr as string
+>> "Current date: " ¶
+value = "+%Y-%m-%d"
+date_str = <\ date {value} \>
+>> date_str
+
+>> "Pi approximation via bash: " ¶
+calc_r = <\ echo "scale=2; 355/113" | bc \>
+>> calc_r
+
+// Variable interpolation inside bash command
+>> "Bash interpolation:" ¶
+bash_name = "world"
+echo_r = <\ echo "hello {bash_name}" \>
+>> echo_r
+
+// Script execution — runs another .zy file, captures its output
+>> "Running zymbol test_script.zy..." ¶
+script_zy_out1 = </ "./test_script.zy" /> //Funcional
+>> script_zy_out1 ¶
+script_zy_out2 = </ test_script.zy /> //Error
+>> script_zy_out2 ¶
+script_zy_out3 = </ ./test_script.zy /> //Error grave no compila
+>> script_zy_out3
+
+>> "Running shell zymbol_script" ¶
+script_sh_out1 = <\ zymbol run /home/rakzo/github/zymbol-lang/vscode/test_script.zy \> //Funciona
+>> script_sh_out1 ¶
+script_pwd = <\ pwd \>
+>> "PWD: "script_pwd ¶
+script_sh_out2 = <\ zymbol run vscode/test_script.zy \> //Error los dos archivos estan en la misma ruta!
+>> script_sh_out2 ¶
+script_sh_out3 = <\"zymbol run ./vscode/test_script.zy" \> //Error los dos archivos estan en la misma ruta!
+>> script_sh_out3 ¶
+
+
+// =============================================================================
+// NUMERIC CASTS  (##.  ###  ##!)
+// =============================================================================
+
+// ##. — convert Int or Float to Float type (preserves value, changes type)
+i_val = 42
+>> ##.i_val ¶           // → 42   (Float type)
+>> ##.3 ¶               // → 3    (literal int → float)
+>> ##.100 ¶             // → 100
+
+// Float → Float pass-through
+f_val = 3.14
+>> ##.f_val ¶           // → 3.14
+
+// ##. enables float division
+>> ##.7 / 2 ¶           // → 3.5  (float division)
+
+// ### — convert Float to Int via rounding (half-up)
+>> ###3.7 ¶             // → 4
+>> ###3.5 ¶             // → 4
+>> ###3.4 ¶             // → 3
+>> ###(-2.9) ¶          // → -3
+f2 = 7.8
+r2 = ###f2
+>> r2 ¶                 // → 8
+
+// ##! — convert Float to Int via truncation (toward zero)
+>> ##!3.9 ¶             // → 3
+>> ##!3.5 ¶             // → 3
+>> ##!(-2.9) ¶          // → -2
+f3 = 2.7
+>> ###f3 ¶              // → 3  (rounds up)
+>> ##!f3 ¶              // → 2  (truncates)
+
+// Casts in expressions and lambdas
+arr_f = [1.1, 2.6, 3.5, 4.4, 5.9]
+rounded_arr   = arr_f$> (x -> ###x)
+>> rounded_arr ¶        // → [1, 3, 4, 4, 6]
+truncated_arr = arr_f$> (x -> ##!x)
+>> truncated_arr ¶      // → [1, 2, 3, 4, 5]
+
+// Type metadata confirms cast results
+meta_cast = r2#?
+>> meta_cast[1] ¶       // → ###
+
+
+// =============================================================================
+// CONCAT-BUILD  ($++)
+// =============================================================================
+
+// $++ on string base — variadic concatenation of mixed types
+n_cb = 42
+pi_cb = 3.14
+flag_cb = #1
+s_cb = "n=" $++ n_cb " pi=" pi_cb " ok=" flag_cb
+>> s_cb ¶               // → n=42 pi=3.14 ok=#1
+
+// Single item
+s_cb2 = "value=" $++ n_cb
+>> s_cb2 ¶              // → value=42
+
+// No items — returns base unchanged
+s_cb3 = "solo" $++
+>> s_cb3 ¶              // → solo
+
+// Char item
+s_cb4 = "hello" $++ '!'
+>> s_cb4 ¶              // → hello!
+
+// Multiple string parts
+s_cb5 = "a" $++ "b" "c" "d"
+>> s_cb5 ¶              // → abcd
+
+// $++ on array base — appends multiple elements
+arr_cb = [1, 2, 3] $++ 4 5 6
+>> arr_cb ¶             // → [1, 2, 3, 4, 5, 6]
+>> (arr_cb$#) ¶         // → 6
+
+arr_cb2 = [10, 20] $++ 30
+>> arr_cb2 ¶            // → [10, 20, 30]
+
+
+// =============================================================================
+// INDEX NAVIGATION  ([i>j]  [i>j>k]  [p;q;r]  [[g];[h]])
+// =============================================================================
+
+mat = [[1,2,3], [4,5,6], [7,8,9]]
+
+// --- Scalar 2D access: [row>col]  (1-based) ---
+>> mat[1>1] ¶           // → 1
+>> mat[1>3] ¶           // → 3
+>> mat[2>2] ¶           // → 5
+>> mat[3>1] ¶           // → 7
+
+// --- Scalar 3D access: [i>j>k] ---
+cube = [[[1,2],[3,4]], [[5,6],[7,8]]]
+>> cube[1>1>1] ¶        // → 1
+>> cube[1>2>2] ¶        // → 4
+>> cube[2>1>2] ¶        // → 6
+
+// --- Flat extraction: [p ; q ; r]  (semicolon-separated paths) ---
+flat1 = mat[1>1 ; 2>2 ; 3>3]
+>> flat1 ¶              // → [1, 5, 9]
+>> (flat1$#) ¶          // → 3
+
+// Double bracket wraps single path in array: [[i>j]]
+flat2 = mat[[2>3]]
+>> flat2 ¶              // → [6]
+
+// --- Structured extraction: [[g] ; [h]]  (group of paths → array of arrays) ---
+struc1 = mat[[1>1, 1>3] ; [3>1, 3>3]]
+>> struc1 ¶             // → [[1, 3], [7, 9]]
+>> (struc1[1]$#) ¶      // → 2
+
+// Structured with ranges: [[row1..row2>col]]
+range_r = mat[[1..2>2] ; [2..3>3]]
+>> range_r ¶            // → [[2, 5], [6, 9]]
+
+// --- Computed indices: (expr) ---
+n_nav = 3
+mid_nav = 2
+>> mat[(n_nav)>(n_nav)] ¶       // → 9
+>> mat[1>(mid_nav+1)] ¶         // → 3
+
+// Flat with computed paths
+flat3 = mat[(1)>(1) ; (n_nav)>(n_nav) ; (mid_nav)>(mid_nav)]
+>> flat3 ¶              // → [1, 9, 5]
+
+// Range with variable bounds
+ini = 1
+fin_nav = 2
+>> mat[ini..fin_nav>2] ¶        // → [[2], [5]]
+
+
+// =============================================================================
+// DONE
+// =============================================================================
+
+>> ¶
+>> "syntax_test.zy completed" ¶
