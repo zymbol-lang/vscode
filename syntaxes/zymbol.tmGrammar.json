@@ -245,7 +245,7 @@
           "match": "><"
         },
         {
-          "name": "constant.character.escape.newline.zymbol",
+          "name": "keyword.operator.newline.zymbol",
           "match": "¶|\\\\\\\\(?!\\s)"
         }
       ]

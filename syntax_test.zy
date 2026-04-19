@@ -785,11 +785,11 @@ mod_r3 = m::add_nums(3, 7)
 // Bash execution — captures stdout + stderr as string
 >> "Current date: " ¶
 value = "+%Y-%m-%d"
-date_str = <\ date {value} \>
+date_str = <\ "date {value}" \>
 >> date_str
 
 >> "Pi approximation via bash: " ¶
-calc_r = <\ echo "scale=2; 355/113" | bc \>
+calc_r = <\ "echo \"scale=2; 355/113\" | bc" \>
 >> calc_r
 
 // Variable interpolation inside bash command
