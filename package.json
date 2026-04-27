@@ -2,7 +2,7 @@
   "name": "zymbol-lang",
   "displayName": "Zymbol-Lang",
   "description": "Official VSCode extension for Zymbol-Lang - A minimalist symbolic programming language with full LSP support",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "zymbol-lang-team",
   "engines": {
     "vscode": "^1.75.0"
