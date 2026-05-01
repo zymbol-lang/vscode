@@ -271,6 +271,11 @@
       "settings": { "foreground": "#9ecbff" }
     },
     {
+      "name": "Hot-definition marker °",
+      "scope": ["keyword.operator.hot-definition"],
+      "settings": { "foreground": "#ff9940", "fontStyle": "bold" }
+    },
+    {
       "name": "Punctuation",
       "scope": [
         "punctuation.separator",

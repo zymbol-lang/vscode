@@ -25,6 +25,7 @@
     { "include": "#base-literals" },
     { "include": "#lifetime-end" },
     { "include": "#operators" },
+    { "include": "#hot-identifiers" },
     { "include": "#function-calls" },
     { "include": "#identifiers" }
   ],
@@ -475,6 +476,26 @@
         {
           "name": "punctuation.separator.colon.zymbol",
           "match": ":"
+        }
+      ]
+    },
+    "hot-identifiers": {
+      "patterns": [
+        {
+          "comment": "Hot function call: name°(...) — base name highlighted as function, ° as hot marker",
+          "match": "([^\\s\\p{Nd}\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°][^\\s\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°]*)(°)(?=\\s*\\()",
+          "captures": {
+            "1": { "name": "entity.name.function.zymbol" },
+            "2": { "name": "keyword.operator.hot-definition.zymbol" }
+          }
+        },
+        {
+          "comment": "Hot identifier: name° — base name as variable, ° as hot-definition marker",
+          "match": "([^\\s\\p{Nd}\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°][^\\s\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°]*)(°)",
+          "captures": {
+            "1": { "name": "variable.other.zymbol" },
+            "2": { "name": "keyword.operator.hot-definition.zymbol" }
+          }
         }
       ]
     },
