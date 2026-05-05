@@ -210,8 +210,12 @@
           "match": "@>"
         },
         {
+          "name": "keyword.control.loop.sleep.zymbol",
+          "match": "@~"
+        },
+        {
           "name": "keyword.control.loop.zymbol",
-          "match": "@(?![!>])"
+          "match": "@(?![!>~])"
         }
       ]
     },
@@ -233,6 +237,30 @@
     },
     "io-operators": {
       "patterns": [
+        {
+          "name": "keyword.operator.output.clear.zymbol",
+          "match": ">>!"
+        },
+        {
+          "name": "keyword.operator.output.query.zymbol",
+          "match": ">>\\?"
+        },
+        {
+          "name": "keyword.operator.output.gate.zymbol",
+          "match": ">>\\|"
+        },
+        {
+          "name": "keyword.operator.output.pos.zymbol",
+          "match": ">>~"
+        },
+        {
+          "name": "keyword.operator.input.key.nonblock.zymbol",
+          "match": "<<\\|\\?"
+        },
+        {
+          "name": "keyword.operator.input.key.zymbol",
+          "match": "<<\\|"
+        },
         {
           "name": "keyword.operator.output.zymbol",
           "match": ">>"
@@ -290,9 +318,9 @@
           "match": "\\$(?:\\+\\+|\\+\\[|\\-\\[|--|\\?\\?|~~|/|<|!!)"
         },
         {
-          "comment": "Single-char collection operators",
+          "comment": "Single-char collection operators — $* is string repeat (GAP-001)",
           "name": "keyword.operator.collection.zymbol",
-          "match": "\\$[#\\+\\-~\\?\\[<>|!/]"
+          "match": "\\$[#\\+\\-~\\?\\[<>|!/\\*]"
         }
       ]
     },
