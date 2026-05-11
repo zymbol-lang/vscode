@@ -342,11 +342,6 @@
         {
           "name": "keyword.operator.namespace.zymbol",
           "match": "::"
-        },
-        {
-          "comment": "Alias operator in imports and exports: <# path <= alias  or  fn <= publicName",
-          "name": "keyword.operator.alias.zymbol",
-          "match": "<="
         }
       ]
     },
@@ -504,11 +499,32 @@
         {
           "name": "punctuation.separator.colon.zymbol",
           "match": ":"
+        },
+        {
+          "comment": "Semicolon path separator inside index navigation [i>j ; k>l]",
+          "name": "punctuation.separator.path.zymbol",
+          "match": ";"
         }
       ]
     },
     "hot-identifiers": {
       "patterns": [
+        {
+          "comment": "Pre-hot function call: °name(...) — ° as hot marker, base name as function",
+          "match": "(°)([^\\s\\p{Nd}\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°][^\\s\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°]*)(?=\\s*\\()",
+          "captures": {
+            "1": { "name": "keyword.operator.hot-definition.zymbol" },
+            "2": { "name": "entity.name.function.zymbol" }
+          }
+        },
+        {
+          "comment": "Pre-hot identifier: °name — ° as hot marker (anchors above nearest loop), base name as variable",
+          "match": "(°)([^\\s\\p{Nd}\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°][^\\s\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°]*)",
+          "captures": {
+            "1": { "name": "keyword.operator.hot-definition.zymbol" },
+            "2": { "name": "variable.other.zymbol" }
+          }
+        },
         {
           "comment": "Hot function call: name°(...) — base name highlighted as function, ° as hot marker",
           "match": "([^\\s\\p{Nd}\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°][^\\s\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°]*)(°)(?=\\s*\\()",

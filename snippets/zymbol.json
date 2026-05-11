@@ -195,12 +195,19 @@
     ],
     "description": "Repeat string N times ($* operator)"
   },
-  "Hot Definition Accumulator": {
+  "Hot Definition Accumulator (postfix)": {
     "prefix": "hotacc",
     "body": [
       "${1:total}° += ${2:value}"
     ],
-    "description": "Hot definition: initialize variable to neutral on first use (°)"
+    "description": "Hot definition postfix: variable anchors at nearest loop, dies when loop ends (x°)"
+  },
+  "Hot Definition Accumulator (prefix)": {
+    "prefix": "hotpre",
+    "body": [
+      "°${1:total} += ${2:value}"
+    ],
+    "description": "Hot definition prefix: variable anchors above nearest loop, survives loop end (°x)"
   },
   "Named Tuple": {
     "prefix": "ntuple",

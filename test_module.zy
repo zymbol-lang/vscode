@@ -1,15 +1,15 @@
-# test_module
+# test_module {
+    #> {
+        add_nums,
+        greet,
+        get_version
+    }
 
-#> {
-    add_nums,
-    greet,
-    get_version
+    VERSION := "1.0"
+
+    add_nums(a, b) { <~ a + b }
+
+    greet(who) { <~ "Hello, {who}!" }
+
+    get_version() { <~ VERSION }
 }
-
-VERSION := "1.0"
-
-add_nums(a, b) { <~ a + b }
-
-greet(who) { <~ "Hello, {who}!" }
-
-get_version() { <~ VERSION }

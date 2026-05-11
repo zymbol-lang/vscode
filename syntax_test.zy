@@ -5,10 +5,7 @@
 // =============================================================================
 
 // Import must come before any statement (grammar requirement)
-<# ./test_module <= m
-
-
-// =============================================================================
+<# ./test_module : m
 // COMMENTS
 // =============================================================================
 
@@ -74,8 +71,8 @@ lit_hex = 0x41          // → 'A'
 greeting = "World"
 s1 = "Hello, {greeting}!"
 s2 = "Tab:\t  Quote:\"  Slash:\\"
-s3 = "Unicode: \u{1F600}"
-s4 = "Literal brace: \{"
+s3 = "Literal braces: \{ and \}"
+s4 = "Carriage return: \r end"
 >> s1 ¶
 >> s2 ¶
 >> s3 ¶
@@ -212,25 +209,33 @@ grade = ?? score {
 }
 >> grade ¶    // → C
 
-// Guard pattern:  _? condition  (wildcard guard — most common)
+// Comparison patterns  (< > <= >= == <>  — implicit comparison against scrutinee)
 temperature = -5
 state = ?? temperature {
-    _? temperature < 0  : "ice"
-    _? temperature < 20 : "cold"
-    _? temperature < 35 : "warm"
-    _                   : "hot"
+    < 0   : "ice"
+    < 20  : "cold"
+    < 35  : "warm"
+    _     : "hot"
 }
 >> state ¶    // → ice
 
-// Guard pattern:  literal ? condition  (pattern guard — literal + extra check)
+// Ident pattern — scalar: equality check; array: containment
+lucky = 7
+allowed = [1, 3, 5, 7, 9]
 val = 7
 desc = ?? val {
-    0         : "zero"
-    1 ? #1    : "one (always)"       // literal 1 with guard condition
-    _? val < 5: "small"
-    _         : "other"
+    0       : "zero"
+    < 5     : "small"
+    lucky   : "lucky number"     // Ident pattern: val == lucky
+    _       : "other"
 }
->> desc ¶    // → other
+>> desc ¶    // → lucky number
+
+in_set = ?? val {
+    allowed : "in allowed set"   // Ident pattern: val ∈ allowed
+    _       : "not in set"
+}
+>> in_set ¶    // → in allowed set
 
 // List pattern  [p1, p2, ...]  and empty list []
 arr_pat = [1, 2, 3]
@@ -255,15 +260,19 @@ code = ?? color {
 // Match as statement (block arms)
 n_val = 42
 ?? n_val {
-    0 : { >> "zero" ¶ }
-    _? n_val < 0 : { >> "negative" ¶ }
-    _ : { >> "positive: " n_val ¶ }
+    0   : { >> "zero" ¶ }
+    < 0 : { >> "negative" ¶ }
+    _   : { >> "positive: " n_val ¶ }
 }
 
 
 // =============================================================================
 // LOOPS  (@  @!  @>  labeled)
 // =============================================================================
+
+// Times loop  (body executes exactly N times, no iterator variable)
+@ 3 { >> "*" }
+>> ¶    // → ***
 
 // Range loop (inclusive on both ends)
 @ i:1..5 {
@@ -277,7 +286,7 @@ n_val = 42
 }
 >> ¶    // → 1 3 5 7 9
 
-// Reverse range
+// Reverse range with step
 @ i:5..1:1 {
     >> i " "
 }
@@ -310,23 +319,23 @@ count = 0
 }
 >> count ¶    // → 3
 
-// Labeled infinite loop
+// Labeled infinite loop  (@:name  @:name!  @:name>)
 outer_n = 0
-@outer {
+@:outer {
     outer_n++
-    ? outer_n >= 3 { @! outer }
+    ? outer_n >= 3 { @:outer! }
 }
 >> outer_n ¶    // → 3
 
-// Labeled nested loops with @! and @>
+// Labeled nested loops with @:name! and @:name>
 found = #0
-@search i:0..4 {
+@:search i:0..4 {
     @ j:0..4 {
         ? i + j == 6 {
             found = #1
-            @! search
+            @:search!
         }
-        @> search
+        @:search>
     }
 }
 >> found ¶    // → #1
@@ -418,9 +427,9 @@ triple = x -> x * factor
 
 // Lambdas as first-class values (stored in array)
 ops = [x -> x + 1, x -> x * 2, x -> x * x]
->> ops[0](5) ¶    // → 6
->> ops[1](5) ¶    // → 10
->> ops[2](5) ¶    // → 25
+>> ops[1](5) ¶    // → 6
+>> ops[2](5) ¶    // → 10
+>> ops[3](5) ¶    // → 25
 
 // Lambda passed as argument directly
 apply(f, v) { <~ f(v) }
@@ -435,10 +444,10 @@ arr  = [1, 2, 3, 4, 5]
 tup  = (10, 20, 30)
 ntup = (name: "Ana", age: 25)
 
-// Access
->> arr[0] ¶      // → 1
->> arr[-1] ¶     // → 5  (negative index)
->> tup[1] ¶      // → 20
+// Access  (1-based indexing — arr[0] is a runtime error)
+>> arr[1] ¶      // → 1
+>> arr[-1] ¶     // → 5  (negative index: last element)
+>> tup[1] ¶      // → 10
 >> ntup.name ¶   // → Ana
 >> ntup.age ¶    // → 25
 
@@ -452,7 +461,7 @@ appended   = arr$+ 6
 >> appended ¶                         // → [1, 2, 3, 4, 5, 6]
 
 inserted   = arr$+[2] 99
->> inserted ¶                         // → [1, 2, 99, 3, 4, 5]
+>> inserted ¶                         // → [1, 99, 2, 3, 4, 5]
 
 removed_v  = arr$- 3
 >> removed_v ¶                        // → [1, 2, 4, 5]
@@ -461,25 +470,25 @@ removed_all = [1, 2, 3, 2, 4]$-- 2
 >> removed_all ¶                      // → [1, 3, 4]
 
 sliced1    = arr$[1..3]
->> sliced1 ¶                          // → [2, 3]
+>> sliced1 ¶                          // → [1, 2, 3]
 
-sliced2    = arr$[0:3]
+sliced2    = arr$[1:3]
 >> sliced2 ¶                          // → [1, 2, 3]
 
-removed_i  = arr$-[0]
+removed_i  = arr$-[1]
 >> removed_i ¶                        // → [2, 3, 4, 5]
 
-removed_r  = arr$-[1..3]
+removed_r  = arr$-[2..3]
 >> removed_r ¶                        // → [1, 4, 5]
 
-removed_c  = arr$-[1:2]
+removed_c  = arr$-[2:2]
 >> removed_c ¶                        // → [1, 4, 5]
 
 contains   = arr$? 3
 >> contains ¶                         // → #1
 
 indices    = [1, 2, 1, 3, 1]$?? 1
->> indices ¶                          // → [0, 2, 4]
+>> indices ¶                          // → [1, 3, 5]
 
 sorted_asc = arr$^+
 >> sorted_asc ¶                       // → [1, 2, 3, 4, 5]
@@ -500,20 +509,20 @@ reduced    = arr$< (0, (acc, x) -> acc + x)
 >> reduced ¶                          // → 15
 
 updated    = arr[2]$~ 99
->> updated ¶                          // → [1, 2, 99, 4, 5]
+>> updated ¶                          // → [1, 99, 3, 4, 5]
 
 
 // --- Indexed assignment ---
 
-arr[0] = 99
+arr[1] = 99
 >> arr ¶                              // → [99, 2, 3, 4, 5]
 
 
 // --- Nested arrays (matrices) ---
 
 matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
->> matrix[1] ¶                        // → [4, 5, 6]
->> matrix[1][2] ¶                     // → 6
+>> matrix[1] ¶                        // → [1, 2, 3]
+>> matrix[2][3] ¶                     // → 6
 
 
 // --- Strings as collections ---
@@ -523,10 +532,10 @@ s = "hello world"
 >> (s$? "world") ¶                    // → #1
 >> (s$? 'w') ¶                        // → #1  (contains char)
 s_indices = s$?? "l"
->> s_indices ¶                        // → [2, 3, 9]
-sub1 = s$[0..5]
+>> s_indices ¶                        // → [3, 4, 10]
+sub1 = s$[1..5]
 >> sub1 ¶                             // → hello
-sub2 = s$[0:5]
+sub2 = s$[1:5]
 >> sub2 ¶                             // → hello
 
 s_app = s$+ "!"
@@ -541,10 +550,10 @@ s_rem1 = s$- 'l'
 s_rem2 = s$-- 'l'
 >> s_rem2 ¶                           // → heo word
 
-s_remi = s$-[0]
+s_remi = s$-[1]
 >> s_remi ¶                           // → ello world
 
-s_remr = s$-[0..6]
+s_remr = s$-[1..6]
 >> s_remr ¶                           // → world
 
 replaced = s$~~["l":"L"]
@@ -573,10 +582,14 @@ d_arr = [10, 20, 30, 40, 50]
 [dx, _, dz]      = [1, 2, 3]   // dx=1  dz=3
 >> da " " d_first ¶
 
-// Positional tuple destructuring  (*rest not supported in positional tuples)
+// Positional tuple destructuring
 d_tup = (100, 200, 300)
 (dpx, dpy) = d_tup              // dpx=100  dpy=200
 >> dpx " " dpy ¶
+
+// *rest works in positional tuples too
+(d_head, *d_tail) = d_tup       // d_head=100  d_tail=[200, 300]
+>> d_head " " d_tail ¶
 
 // Named tuple destructuring
 d_person = (name: "Ana", age: 25, city: "Madrid")
@@ -596,7 +609,7 @@ r1 = 5 |> double(_)
 r2 = 5 |> (x -> x * 3)(_)
 >> r2 ¶    // → 15
 
-// With extra arguments (using lambda — declared functions are not first-class in pipe)
+// Pipe with placeholder _ for non-first position
 add_fn = (a, b) -> a + b
 r3 = 10 |> add_fn(_, 5)    // _ in first position
 >> r3 ¶    // → 15
@@ -604,9 +617,12 @@ r3 = 10 |> add_fn(_, 5)    // _ in first position
 r3b = 5 |> add_fn(2, _)    // _ in second position
 >> r3b ¶   // → 7
 
-// Chained pipe
-r4 = 5 |> double(_) |> inc(_) |> double(_)
+// Chained pipe — implicit (no _) and explicit (_ placeholder) forms both valid
+r4 = 5 |> double |> inc |> double
 >> r4 ¶    // → 22  (5→10→11→22)
+
+r4b = 5 |> double(_) |> inc(_) |> double(_)
+>> r4b ¶   // → 22  (equivalent explicit form)
 
 
 // =============================================================================
@@ -720,14 +736,18 @@ evens = nums$| (x -> x % 2 == 0)
 total = nums$< (0, (acc, x) -> acc + x)
 >> total ¶      // → 55
 
-// Named functions inside HOF (must be wrapped in lambda)
+// Named functions passed directly to HOF (no wrapper lambda needed)
 is_big(val) { <~ val > 5 }
-big_doubled = nums$| (x -> is_big(x))
->> big_doubled ¶    // → [6, 7, 8, 9, 10]
+double_fn(x) { <~ x * 2 }
+big_nums = nums$| is_big             // direct reference
+>> big_nums ¶    // → [6, 7, 8, 9, 10]
+
+doubled_direct = nums$> double_fn   // direct reference
+>> doubled_direct ¶    // → [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
 
 // Reduce with block lambda
 data = [3, 1, 4, 1, 5, 9, 2, 6]
-maximum = data$< (data[0], (mx, xv) -> {
+maximum = data$< (data[1], (mx, xv) -> {
     ? xv > mx { <~ xv }
     <~ mx
 })
@@ -745,11 +765,11 @@ db = [
     (name: "Bob",   age: 30)
 ]
 by_age = db$^ (a, b) -> a.age < b.age
->> by_age[0].name ¶    // → Ana
+>> by_age[1].name ¶    // → Ana
 
 
 // =============================================================================
-// MODULE SYSTEM  (#name  #>  <#  ::  <=)
+// MODULE SYSTEM  (#name  #>  <#  ::)
 // =============================================================================
 
 // Module declaration (first line of a module file):  # module_name
@@ -757,13 +777,11 @@ by_age = db$^ (a, b) -> a.age < b.age
 // # test_module
 // #> {
 //     add_nums,
-//     greet <= publicGreet,     // renamed export
+//     greet : publicGreet,     // renamed export  (`:` since v0.0.5; `<=` is now comparison only)
 //     get_version
 // }
 
-// Import (declared at top of file — see line 7):  <# ./test_module <= m
-
-// Namespaced function call via ::
+// Import (declared at top of file — see line 7):  <# ./test_module : m  Namespaced function call via ::
 mod_r1 = m::add_nums(10, 5)
 >> mod_r1 ¶                         // → 15
 
@@ -950,6 +968,84 @@ flat3 = mat[(1)>(1) ; (n_nav)>(n_nav) ; (mid_nav)>(mid_nav)]
 ini = 1
 fin_nav = 2
 >> mat[ini..fin_nav>2] ¶        // → [[2], [5]]
+
+
+// =============================================================================
+// HOT DEFINITION  (°)
+// =============================================================================
+
+// Numeric accumulation — neutral value is 0
+hot_nums = [10, 20, 30]
+@ item:hot_nums {
+    total° += item
+}
+>> total ¶    // → 60
+
+// Array accumulation — neutral value is []
+lista = []
+@ x:[1, 2, 3] {
+    lista = lista $+ x
+}
+>> lista ¶    // → [1, 2, 3]
+
+// String accumulation — neutral value is ""
+resultado = ""
+@ s:["a", "b", "c"] {
+    resultado = resultado $++ s
+}
+>> resultado ¶    // → abc
+
+
+// =============================================================================
+// STRING REPEAT  ($*)
+// =============================================================================
+
+sep = "-" $* 20
+>> sep ¶             // → --------------------
+
+echo_r = "ab" $* 3
+>> echo_r ¶          // → ababab
+
+pad = " " $* 5
+>> "{pad}hello" ¶    // →      hello
+
+
+// =============================================================================
+// TUI / TERMINAL PRIMITIVES  (>>|  >>!  >>?  >>~  <<|  <<|?  @~)
+// =============================================================================
+
+// @~ N — sleep N milliseconds
+@~ 0    // sleep 0 ms (no-op for syntax coverage)
+
+// >>? — query terminal size; returns [rows, cols] array
+[term_h, term_w] = >>?
+>> "terminal: " term_h "x" term_w ¶
+
+// >>! — clear terminal screen  (commented — resets display)
+// >>!
+
+// <<| var — blocking keypress read  (commented — blocks execution)
+// <<| key_ch
+// >> "key: " key_ch ¶
+
+// <<|? var — non-blocking keypress poll (returns '\0' if no key pending)
+// <<|? nb_ch
+// ? nb_ch <> '\0' { >> "pressed: " nb_ch ¶ }
+
+// >>~ (row, col, BKS, fg, bg) > items — positioned output, sparse form
+// >>~ (1, 1) > "top-left"
+// >>~ (,,, 196) > "red text"            // fg=196 (ANSI 256), no cursor move
+// >>~ (2, 5, 1) > "bold at row 2"       // BKS=1 → bold
+
+// >>| { } — TUI block (alternate screen + raw mode)
+// >>| {
+//     >>!
+//     >>~ (1, 1) > "Press q to quit"
+//     @ {
+//         <<| k
+//         ? k == 'q' { @! }
+//     }
+// }
 
 
 // =============================================================================

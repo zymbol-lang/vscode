@@ -234,7 +234,7 @@
       "settings": { "foreground": "#1a6a99" }
     },
     {
-      "name": "Keywords — control flow (? @ ?? _ <~ <# #>)",
+      "name": "Keywords — control flow (? @ ?? _ <~ <# #>  ¶ \\\\)",
       "scope": [
         "keyword.control",
         "keyword.operator.return-output",
@@ -242,6 +242,7 @@
         "keyword.control.module",
         "keyword.operator.output",
         "keyword.operator.input",
+        "keyword.operator.newline",
         "constant.character.escape.newline",
         "storage.type.function.arrow"
       ],
