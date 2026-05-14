@@ -39,9 +39,9 @@
     "prefix": "match",
     "body": [
       "result = ?? ${1:value} {",
-      "\t${2:pattern1} : ${3:value1}",
-      "\t${4:pattern2} : ${5:value2}",
-      "\t_ : ${6:default}",
+      "\t${2:pattern1} => ${3:value1}",
+      "\t${4:pattern2} => ${5:value2}",
+      "\t_ => ${6:default}",
       "}"
     ],
     "description": "Pattern matching statement"
@@ -230,12 +230,12 @@
     ],
     "description": "Import module"
   },
-  "Import Function": {
-    "prefix": "importfunc",
+  "Import Module with Alias": {
+    "prefix": "importalias",
     "body": [
-      "<# ${1:module_path}:${2:function_name}"
+      "<# ${1:module_path} => ${2:alias}"
     ],
-    "description": "Import specific function"
+    "description": "Import module with alias"
   },
   "Type Metadata": {
     "prefix": "meta",

@@ -214,8 +214,13 @@
           "match": "@~"
         },
         {
+          "comment": "Labeled loop @:label — must precede plain @ to capture @: as a unit",
+          "name": "keyword.control.loop.label.zymbol",
+          "match": "@:"
+        },
+        {
           "name": "keyword.control.loop.zymbol",
-          "match": "@(?![!>~])"
+          "match": "@(?![!>~:])"
         }
       ]
     },
@@ -282,12 +287,22 @@
     "function-operators": {
       "patterns": [
         {
+          "comment": "Script execution delimiters <\\ (open) and \\> (close) — must precede <~ and standalone \\",
+          "name": "keyword.operator.script-exec.zymbol",
+          "match": "<\\\\|\\\\>"
+        },
+        {
           "name": "keyword.operator.return-output.zymbol",
           "match": "<~"
         },
         {
           "name": "storage.type.function.arrow.zymbol",
           "match": "->"
+        },
+        {
+          "comment": "Fat arrow — match arm separator and module alias/rename (must precede plain =)",
+          "name": "keyword.operator.fat-arrow.zymbol",
+          "match": "=>"
         }
       ]
     },
@@ -313,12 +328,17 @@
     "collection-operators": {
       "patterns": [
         {
-          "comment": "Multi-char collection operators — must precede single-char patterns",
+          "comment": "Sort with direction — must precede multi-char and plain $^",
           "name": "keyword.operator.collection.zymbol",
-          "match": "\\$(?:\\+\\+|\\+\\[|\\-\\[|--|\\?\\?|~~|/|<|!!)"
+          "match": "\\$\\^[\\+\\-]"
         },
         {
-          "comment": "Single-char collection operators — $* is string repeat (GAP-001)",
+          "comment": "Multi-char collection operators — must precede single-char patterns",
+          "name": "keyword.operator.collection.zymbol",
+          "match": "\\$(?:\\^|\\+\\+|\\+\\[|\\-\\[|--|\\?\\?|~~|/|<|!!)"
+        },
+        {
+          "comment": "Single-char collection operators — $* is string repeat, $/ is integer div",
           "name": "keyword.operator.collection.zymbol",
           "match": "\\$[#\\+\\-~\\?\\[<>|!/\\*]"
         }
