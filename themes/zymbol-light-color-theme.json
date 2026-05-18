@@ -234,7 +234,7 @@
       "settings": { "foreground": "#1a6a99" }
     },
     {
-      "name": "Keywords — control flow (? @ ?? _ <~ <# #>)",
+      "name": "Keywords — control flow (? @ ?? _ <~ <# #>  ¶ \\\\ >< @: <\\ \\>)",
       "scope": [
         "keyword.control",
         "keyword.operator.return-output",
@@ -242,13 +242,18 @@
         "keyword.control.module",
         "keyword.operator.output",
         "keyword.operator.input",
+        "keyword.operator.newline",
+        "keyword.operator.args",
+        "keyword.operator.lifetime-end",
+        "keyword.operator.script-exec",
         "constant.character.escape.newline",
-        "storage.type.function.arrow"
+        "storage.type.function.arrow",
+        "keyword.operator.fat-arrow"
       ],
       "settings": { "foreground": "#008a48", "fontStyle": "bold" }
     },
     {
-      "name": "Operators — arithmetic, comparison, range, pipe, assignment",
+      "name": "Operators — arithmetic, comparison, range, pipe, assignment, cast",
       "scope": [
         "keyword.operator.arithmetic",
         "keyword.operator.comparison",
@@ -261,7 +266,9 @@
         "keyword.operator.metadata",
         "keyword.operator.numeric-eval",
         "keyword.operator.format",
-        "keyword.operator.base-conversion"
+        "keyword.operator.base-conversion",
+        "keyword.operator.cast",
+        "keyword.operator.increment"
       ],
       "settings": { "foreground": "#3a6fa8" }
     },
@@ -269,6 +276,11 @@
       "name": "Collection operators ($# $+ $- $~ $? $[)",
       "scope": ["keyword.operator.collection"],
       "settings": { "foreground": "#3a6fa8" }
+    },
+    {
+      "name": "Hot-definition marker °",
+      "scope": ["keyword.operator.hot-definition"],
+      "settings": { "foreground": "#c05800", "fontStyle": "bold" }
     },
     {
       "name": "Punctuation",

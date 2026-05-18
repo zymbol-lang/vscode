@@ -4,6 +4,8 @@
 
 <h1 align="center">Zymbol-Lang — VS Code Extension</h1>
 
+> **Revisado para v0.0.5 — 2026-05-12**
+
 <p align="center">
   Official Visual Studio Code extension for Zymbol-Lang.<br/>
   Syntax highlighting, LSP support, snippets, formatter and runner.

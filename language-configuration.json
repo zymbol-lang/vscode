@@ -29,7 +29,7 @@
             "end": "\\}"
         }
     },
-    "wordPattern": "[a-zA-Z_\\u00C0-\\u024F\\u1E00-\\u1EFF\\u0370-\\u03FF\\u0400-\\u04FF\\u0600-\\u06FF\\u0900-\\u097F\\u4E00-\\u9FFF\\u3040-\\u309F\\u30A0-\\u30FF\\uAC00-\\uD7AF\\uD800-\\uDFFF][a-zA-Z0-9_\\u00C0-\\u024F\\u1E00-\\u1EFF\\u0370-\\u03FF\\u0400-\\u04FF\\u0600-\\u06FF\\u0900-\\u097F\\u4E00-\\u9FFF\\u3040-\\u309F\\u30A0-\\u30FF\\uAC00-\\uD7AF\\uD800-\\uDFFF]*",
+    "wordPattern": "[a-zA-Z_\\u00C0-\\u024F\\u1E00-\\u1EFF\\u0370-\\u03FF\\u0400-\\u04FF\\u0600-\\u06FF\\u0900-\\u097F\\u4E00-\\u9FFF\\u3040-\\u309F\\u30A0-\\u30FF\\uAC00-\\uD7AF\\uD800-\\uDFFF][a-zA-Z0-9_\\u00B0\\u00C0-\\u024F\\u1E00-\\u1EFF\\u0370-\\u03FF\\u0400-\\u04FF\\u0600-\\u06FF\\u0900-\\u097F\\u4E00-\\u9FFF\\u3040-\\u309F\\u30A0-\\u30FF\\uAC00-\\uD7AF\\uD800-\\uDFFF]*",
     "indentationRules": {
         "increaseIndentPattern": "^\\s*[\\?_\\@].*\\{\\s*$",
         "decreaseIndentPattern": "^\\s*\\}.*$"

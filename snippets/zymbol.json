@@ -39,9 +39,9 @@
     "prefix": "match",
     "body": [
       "result = ?? ${1:value} {",
-      "\t${2:pattern1} : ${3:value1}",
-      "\t${4:pattern2} : ${5:value2}",
-      "\t_ : ${6:default}",
+      "\t${2:pattern1} => ${3:value1}",
+      "\t${4:pattern2} => ${5:value2}",
+      "\t_ => ${6:default}",
       "}"
     ],
     "description": "Pattern matching statement"
@@ -123,6 +123,92 @@
     ],
     "description": "Input with prompt"
   },
+  "Sleep": {
+    "prefix": "sleep",
+    "body": [
+      "@~ ${1:milliseconds}"
+    ],
+    "description": "Sleep N milliseconds (@~ N)"
+  },
+  "Clear Screen": {
+    "prefix": "cls",
+    "body": [
+      ">>!"
+    ],
+    "description": "Clear terminal screen (>>!)"
+  },
+  "Terminal Size": {
+    "prefix": "termsize",
+    "body": [
+      "[${1:rows}, ${2:cols}] = >>?"
+    ],
+    "description": "Query terminal size — returns (rows, cols) tuple (>>?)"
+  },
+  "Key Input Blocking": {
+    "prefix": "key",
+    "body": [
+      "<<| ${1:key_var}"
+    ],
+    "description": "Read one keypress — blocking (<<| var)"
+  },
+  "Key Input Non-Blocking": {
+    "prefix": "keynb",
+    "body": [
+      "<<|? ${1:key_var}"
+    ],
+    "description": "Poll one keypress — non-blocking, '\\0' if none (<<|? var)"
+  },
+  "Positioned Output": {
+    "prefix": "outp",
+    "body": [
+      ">>~ (${1:row}, ${2:col}) > ${3:value}"
+    ],
+    "description": "Print at terminal position (>>~ (row, col) > items)"
+  },
+  "Positioned Output with Style": {
+    "prefix": "outps",
+    "body": [
+      ">>~ (${1:row}, ${2:col}, ${3:0}, ${4:fg}, ${5:bg}) > ${6:value}"
+    ],
+    "description": "Print at position with BKS style and ANSI colors (>>~ (row, col, BKS, fg, bg) > items). BKS: 1=Bold 2=Italic 4=Underline"
+  },
+  "Positioned Output Color Only": {
+    "prefix": "outpc",
+    "body": [
+      ">>~ (,,, ${1:fg}) > ${2:value}"
+    ],
+    "description": "Set foreground color without moving cursor (>>~ (,,,fg) > items)"
+  },
+  "TUI Block": {
+    "prefix": "tui",
+    "body": [
+      ">>| {",
+      "\t${1:// terminal UI code}",
+      "}"
+    ],
+    "description": "TUI block — alternate screen + raw mode (>>| { })"
+  },
+  "String Repeat": {
+    "prefix": "repeat",
+    "body": [
+      "\"${1:str}\" $* ${2:n}"
+    ],
+    "description": "Repeat string N times ($* operator)"
+  },
+  "Hot Definition Accumulator (postfix)": {
+    "prefix": "hotacc",
+    "body": [
+      "${1:total}° += ${2:value}"
+    ],
+    "description": "Hot definition postfix: variable anchors at nearest loop, dies when loop ends (x°)"
+  },
+  "Hot Definition Accumulator (prefix)": {
+    "prefix": "hotpre",
+    "body": [
+      "°${1:total} += ${2:value}"
+    ],
+    "description": "Hot definition prefix: variable anchors above nearest loop, survives loop end (°x)"
+  },
   "Named Tuple": {
     "prefix": "ntuple",
     "body": [
@@ -144,12 +230,12 @@
     ],
     "description": "Import module"
   },
-  "Import Function": {
-    "prefix": "importfunc",
+  "Import Module with Alias": {
+    "prefix": "importalias",
     "body": [
-      "<# ${1:module_path}:${2:function_name}"
+      "<# ${1:module_path} => ${2:alias}"
     ],
-    "description": "Import specific function"
+    "description": "Import module with alias"
   },
   "Type Metadata": {
     "prefix": "meta",
