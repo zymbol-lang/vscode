@@ -231,6 +231,14 @@ Check the output panel: View → Output → Zymbol-Lang LSP
 
 ---
 
+## Authorship & AI Collaboration
+
+This extension is designed by **[OscarE.EspinozaB](https://github.com/zymbol-lang/interpreter/commits?author=OscarEEspinozaB)**, the author of Zymbol-Lang. Feature scope, LSP integration decisions, grammar design, and the verification process for each release are fully controlled by the author.
+
+The implementation was built using **[Claude Code](https://claude.ai/code)** (Anthropic) as the engineering team, working from the author's specifications. This is transparent and intentional — AI accelerated delivery; it did not define the design.
+
+---
+
 ## License
 
 AGPL-3.0 — see [LICENSE](./LICENSE)
