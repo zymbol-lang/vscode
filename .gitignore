@@ -7,6 +7,9 @@ out/
 # Built extension packages
 *.vsix
 
+# SHA256 checksum (generated fresh by CI and uploaded as a release asset)
+SHA256_vsix.txt
+
 # Editor and OS
 .vscode/
 .idea/
