@@ -130,9 +130,9 @@
     "numeric-casts": {
       "patterns": [
         {
-          "comment": "Numeric cast operators — must precede error-types (## prefix)",
+          "comment": "Type cast / input-typespec operators — must precede strings, chars and error-types (## prefix). Includes ##\" (String) and ##' (Char) used as typed-input markers.",
           "name": "keyword.operator.cast.zymbol",
-          "match": "##\\.|###|##!"
+          "match": "##\\.|###|##!|##\\\"|##'"
         }
       ]
     },
@@ -279,8 +279,9 @@
           "match": "><"
         },
         {
+          "comment": "Newline statement: ¶ or \\\\ (double backslash). No trailing lookahead — \\\\ must highlight even at end of line (where it is followed by the line break) or before whitespace. Distinct from lifetime-end, which is a single backslash.",
           "name": "keyword.operator.newline.zymbol",
-          "match": "¶|\\\\\\\\(?!\\s)"
+          "match": "¶|\\\\\\\\"
         }
       ]
     },

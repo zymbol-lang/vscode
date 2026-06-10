@@ -168,6 +168,20 @@ pow_r = 2 ^ 10
 >> ¶                                  // blank line
 >> x " is " n_int ¶                  // multiple items by juxtaposition
 
+// INPUT  (<<  #|var|  and typed typespecs).  Guarded by `? #0` so the file stays
+// runnable (these would block on stdin), while the operators are still highlighted.
+? #0 {
+    << raw_line                       // read a line as String
+    << "Name: " who                   // with prompt
+    << #|legacy_num|                  // legacy numeric (Int/Float else String)
+    << ##.(5,2) "Decimal: " amount    // ##.  Float, <=5 digits / <=2 decimals
+    << ##.      "Float: "   ratio     // ##.  free float
+    << ###(4)   "Int: "     qty       // ###  integer, <=4 digits
+    << ##"(20)  "Text: "    label     // ##"  String, <=20 chars
+    << ##'      "Char: "    initial   // ##'  exactly one character
+    >> raw_line who legacy_num amount ratio qty label initial ¶
+}
+
 
 // =============================================================================
 // LIFETIME END  (\identifier)
