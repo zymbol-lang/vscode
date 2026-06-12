@@ -226,9 +226,9 @@
   "Import Module": {
     "prefix": "import",
     "body": [
-      "<# ${1:module_path}"
+      "<# ${1:./module_path} => ${2:alias}"
     ],
-    "description": "Import module"
+    "description": "Import a module (alias is mandatory)"
   },
   "Import Module with Alias": {
     "prefix": "importalias",
@@ -241,9 +241,7 @@
     "prefix": "meta",
     "body": [
       "info = ${1:value}#?",
-      "type_symbol = info[0]",
-      "count = info[1]",
-      "value = info[2]"
+      "type_symbol = info[1]"
     ],
     "description": "Get type metadata"
   },
@@ -257,25 +255,29 @@
   "Scientific Format": {
     "prefix": "sci",
     "body": [
-      "e|${1:value}|"
+      "#^|${1:value}|"
     ],
     "description": "Scientific notation format"
   },
   "Comma Format": {
     "prefix": "comma",
     "body": [
-      "c|${1:value}|"
+      "#,|${1:value}|"
     ],
     "description": "Comma-separated format"
   },
   "Module Declaration": {
     "prefix": "module",
     "body": [
-      "# ${1:module_name}",
+      "# ${1:module_name} {",
+      "\t#> { ${2:exported_fn} }",
       "",
-      "$0"
+      "\t${2:exported_fn}(${3:params}) {",
+      "\t\t<~ $0",
+      "\t}",
+      "}"
     ],
-    "description": "Module declaration"
+    "description": "Module block with export list"
   },
   "Comment": {
     "prefix": "//",
@@ -283,5 +285,102 @@
       "// ${1:comment}"
     ],
     "description": "Line comment"
+  },
+  "Try-Catch": {
+    "prefix": "try",
+    "body": [
+      "!? {",
+      "\t${1:// code that may fail}",
+      "} :! {",
+      "\t>> \"error: \" _err ¶",
+      "}"
+    ],
+    "description": "Try/catch block (!? :!) — _err holds the error"
+  },
+  "Try-Catch-Finally (typed)": {
+    "prefix": "tryfull",
+    "body": [
+      "!? {",
+      "\t${1:// code that may fail}",
+      "} :! ##${2|IO,Div,Index,Type,Parse,Network,DB|} {",
+      "\t${3:// typed handler}",
+      "} :! {",
+      "\t>> \"other: \" _err ¶",
+      "} :> {",
+      "\t${4:// finally — always runs}",
+      "}"
+    ],
+    "description": "Try with typed catch, catch-all, and finally (:>)"
+  },
+  "Import std/math": {
+    "prefix": "stdmath",
+    "body": [
+      "<# std/math => ${1:mat}"
+    ],
+    "description": "Import std/math (sqrt exp ln log pow sin cos … + PI/E)"
+  },
+  "Import std/random": {
+    "prefix": "stdrandom",
+    "body": [
+      "<# std/random => ${1:rnd}"
+    ],
+    "description": "Import std/random (entero rango peso_f64)"
+  },
+  "Import std/json": {
+    "prefix": "stdjson",
+    "body": [
+      "<# std/json => ${1:j}"
+    ],
+    "description": "Import std/json (decode encode)"
+  },
+  "Import std/io": {
+    "prefix": "stdio",
+    "body": [
+      "<# std/io => ${1:io}"
+    ],
+    "description": "Import std/io (read write append exists delete list mkdir)"
+  },
+  "Import std/net": {
+    "prefix": "stdnet",
+    "body": [
+      "<# std/net => ${1:net}"
+    ],
+    "description": "Import std/net (get post post_json head)"
+  },
+  "Import std/db": {
+    "prefix": "stddb",
+    "body": [
+      "<# std/db => ${1:db}"
+    ],
+    "description": "Import std/db (ODBC: connect exec query tx …)"
+  },
+  "Read File (with error check)": {
+    "prefix": "ioread",
+    "body": [
+      "${1:texto} = ${2:io}::read(${3:\"ruta.txt\"})",
+      "? ${1:texto}$! {",
+      "\t>> \"no se pudo leer\" ¶",
+      "} _ {",
+      "\t>> ${1:texto} ¶",
+      "}"
+    ],
+    "description": "std/io read + soft-error check with $! (needs <# std/io => io)"
+  },
+  "Database Session (std/db)": {
+    "prefix": "dbconnect",
+    "body": [
+      "${1:db}::connect(\"${2:c}\", \"${3:Driver={SQLite3};Database=/tmp/app.db;}\")",
+      "${1:db}::exec(\"${2:c}\", \"${4:CREATE TABLE IF NOT EXISTS t(id INTEGER PRIMARY KEY)}\")",
+      "${5:filas} = ${1:db}::query(\"${2:c}\", \"${6:SELECT * FROM t WHERE id = ?}\", (${7:1},))",
+      "${1:db}::disconnect(\"${2:c}\")"
+    ],
+    "description": "std/db connect → exec → parameterized query → disconnect (needs <# std/db => db)"
+  },
+  "Typed Input": {
+    "prefix": "intyped",
+    "body": [
+      "<< ${1|###,###(4),##.,##.(5\\,2),##\\\",##\\\"(20),##'|} \"${2:prompt}: \" ${3:var}"
+    ],
+    "description": "Typed/validated input — re-prompts until input matches the typespec"
   }
 }
