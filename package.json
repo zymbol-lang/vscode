@@ -147,12 +147,12 @@
         "zymbol-lang.executablePath": {
           "type": "string",
           "default": "zymbol",
-          "description": "Path to Zymbol-Lang CLI executable for running files"
+          "description": "Path to the Zymbol-Lang CLI used to run and format files. Leave as 'zymbol' to search the usual install locations and any build inside the workspace (on Windows, .exe is added automatically)."
         },
         "zymbol-lang.lspPath": {
           "type": "string",
-          "default": "zymbol-lsp",
-          "description": "Path to Zymbol-Lang LSP server executable"
+          "default": "",
+          "description": "Absolute path to a Zymbol-Lang LSP server executable. Leave empty to search automatically. A relative name has no effect — the path must be absolute and exist."
         },
         "zymbol-lang.enableLsp": {
           "type": "boolean",
