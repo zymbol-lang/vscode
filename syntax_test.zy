@@ -456,7 +456,7 @@ apply(f, v) { <~ f(v) }
 
 arr  = [1, 2, 3, 4, 5]
 tup  = (10, 20, 30)
-ntup = (name: "Ana", age: 25)
+ntup = #(name: "Ana", age: 25)
 
 // Access  (1-based indexing — arr[0] is a runtime error)
 >> arr[1] ¶      // → 1
@@ -606,8 +606,8 @@ d_tup = (100, 200, 300)
 >> d_head " " d_tail ¶
 
 // Named tuple destructuring
-d_person = (name: "Ana", age: 25, city: "Madrid")
-(name: d_n, age: d_a) = d_person    // d_n="Ana"  d_a=25
+d_person = #(name: "Ana", age: 25, city: "Madrid")
+#(name: d_n, age: d_a) = d_person    // d_n="Ana"  d_a=25
 >> d_n " " d_a ¶
 
 
@@ -774,9 +774,9 @@ step2 = step1$> (x -> x * x)
 
 // Sort named tuple array by field
 db = [
-    (name: "Carla", age: 28),
-    (name: "Ana",   age: 25),
-    (name: "Bob",   age: 30)
+    #(name: "Carla", age: 28),
+    #(name: "Ana",   age: 25),
+    #(name: "Bob",   age: 30)
 ]
 by_age = db$^ (a, b) -> a.age < b.age
 >> by_age[1].name ¶    // → Ana
