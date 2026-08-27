@@ -3,31 +3,84 @@
   "name": "Zymbol-Lang",
   "scopeName": "source.zymbol",
   "patterns": [
-    { "include": "#comments" },
-    { "include": "#strings" },
-    { "include": "#chars" },
-    { "include": "#numeral-mode" },
-    { "include": "#numbers" },
-    { "include": "#booleans" },
-    { "include": "#numeric-casts" },
-    { "include": "#error-types" },
-    { "include": "#bash-exec" },
-    { "include": "#script-exec" },
-    { "include": "#control-flow" },
-    { "include": "#error-handling" },
-    { "include": "#io-operators" },
-    { "include": "#function-operators" },
-    { "include": "#compound-assign" },
-    { "include": "#collection-operators" },
-    { "include": "#module-operators" },
-    { "include": "#data-operators" },
-    { "include": "#format-expressions" },
-    { "include": "#base-literals" },
-    { "include": "#lifetime-end" },
-    { "include": "#operators" },
-    { "include": "#hot-identifiers" },
-    { "include": "#function-calls" },
-    { "include": "#identifiers" }
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#chars"
+    },
+    {
+      "include": "#numeral-mode"
+    },
+    {
+      "include": "#base-literals"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#booleans"
+    },
+    {
+      "include": "#numeric-casts"
+    },
+    {
+      "include": "#error-types"
+    },
+    {
+      "include": "#collection-literals"
+    },
+    {
+      "include": "#bash-exec"
+    },
+    {
+      "include": "#script-exec"
+    },
+    {
+      "include": "#control-flow"
+    },
+    {
+      "include": "#error-handling"
+    },
+    {
+      "include": "#io-operators"
+    },
+    {
+      "include": "#function-operators"
+    },
+    {
+      "include": "#compound-assign"
+    },
+    {
+      "include": "#collection-operators"
+    },
+    {
+      "include": "#module-operators"
+    },
+    {
+      "include": "#data-operators"
+    },
+    {
+      "include": "#format-expressions"
+    },
+    {
+      "include": "#lifetime-end"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#hot-identifiers"
+    },
+    {
+      "include": "#function-calls"
+    },
+    {
+      "include": "#identifiers"
+    }
   ],
   "repository": {
     "comments": {
@@ -37,10 +90,14 @@
           "begin": "/\\*",
           "end": "\\*/",
           "beginCaptures": {
-            "0": { "name": "punctuation.definition.comment.begin.zymbol" }
+            "0": {
+              "name": "punctuation.definition.comment.begin.zymbol"
+            }
           },
           "endCaptures": {
-            "0": { "name": "punctuation.definition.comment.end.zymbol" }
+            "0": {
+              "name": "punctuation.definition.comment.end.zymbol"
+            }
           }
         },
         {
@@ -122,8 +179,9 @@
     "booleans": {
       "patterns": [
         {
+          "comment": "`#0`/`#1` in ANY script: the lexer reads the digit by VALUE, so `#१` and `#𑜱` are booleans too. The 69 ranges are the '0' and '1' of every block `digitValue` knows in zymbol.js — matching `[01]` marked only the Latin ones. No `\\b`: it does not hold for non-ASCII, and `#12` is `#1` then `2` anyway, which is what the lexer does.",
           "name": "constant.language.boolean.zymbol",
-          "match": "#[01]\\b"
+          "match": "#[\\u0030-\\u0031\\u0660-\\u0661\\u06F0-\\u06F1\\u07C0-\\u07C1\\u0966-\\u0967\\u09E6-\\u09E7\\u0A66-\\u0A67\\u0AE6-\\u0AE7\\u0B66-\\u0B67\\u0BE6-\\u0BE7\\u0C66-\\u0C67\\u0CE6-\\u0CE7\\u0D66-\\u0D67\\u0DE6-\\u0DE7\\u0E50-\\u0E51\\u0ED0-\\u0ED1\\u0F20-\\u0F21\\u1040-\\u1041\\u1090-\\u1091\\u17E0-\\u17E1\\u1810-\\u1811\\u1946-\\u1947\\u19D0-\\u19D1\\u1A80-\\u1A81\\u1A90-\\u1A91\\u1B50-\\u1B51\\u1BB0-\\u1BB1\\u1C40-\\u1C41\\u1C50-\\u1C51\\uA620-\\uA621\\uA8D0-\\uA8D1\\uA900-\\uA901\\uA9D0-\\uA9D1\\uA9F0-\\uA9F1\\uAA50-\\uAA51\\uABF0-\\uABF1\\uF8F0-\\uF8F1\\uFF10-\\uFF11\\x{104A0}-\\x{104A1}\\x{10D30}-\\x{10D31}\\x{11066}-\\x{11067}\\x{110F0}-\\x{110F1}\\x{11136}-\\x{11137}\\x{111D0}-\\x{111D1}\\x{112F0}-\\x{112F1}\\x{11450}-\\x{11451}\\x{114D0}-\\x{114D1}\\x{11650}-\\x{11651}\\x{116C0}-\\x{116C1}\\x{11730}-\\x{11731}\\x{118E0}-\\x{118E1}\\x{11950}-\\x{11951}\\x{11C50}-\\x{11C51}\\x{11D50}-\\x{11D51}\\x{11DA0}-\\x{11DA1}\\x{11F50}-\\x{11F51}\\x{16A60}-\\x{16A61}\\x{16AC0}-\\x{16AC1}\\x{16B50}-\\x{16B51}\\x{1D7CE}-\\x{1D7CF}\\x{1D7D8}-\\x{1D7D9}\\x{1D7E2}-\\x{1D7E3}\\x{1D7EC}-\\x{1D7ED}\\x{1D7F6}-\\x{1D7F7}\\x{1E140}-\\x{1E141}\\x{1E2F0}-\\x{1E2F1}\\x{1E4F0}-\\x{1E4F1}\\x{1E950}-\\x{1E951}\\x{1FBF0}-\\x{1FBF1}]"
         }
       ]
     },
@@ -153,10 +211,14 @@
           "begin": "<\\\\",
           "end": "\\\\>",
           "beginCaptures": {
-            "0": { "name": "punctuation.section.embedded.begin.zymbol" }
+            "0": {
+              "name": "punctuation.section.embedded.begin.zymbol"
+            }
           },
           "endCaptures": {
-            "0": { "name": "punctuation.section.embedded.end.zymbol" }
+            "0": {
+              "name": "punctuation.section.embedded.end.zymbol"
+            }
           },
           "patterns": [
             {
@@ -175,10 +237,14 @@
           "begin": "</",
           "end": "/>",
           "beginCaptures": {
-            "0": { "name": "punctuation.section.embedded.begin.zymbol" }
+            "0": {
+              "name": "punctuation.section.embedded.begin.zymbol"
+            }
           },
           "endCaptures": {
-            "0": { "name": "punctuation.section.embedded.end.zymbol" }
+            "0": {
+              "name": "punctuation.section.embedded.end.zymbol"
+            }
           }
         }
       ]
@@ -358,7 +424,8 @@
         },
         {
           "name": "keyword.control.module.zymbol",
-          "match": "^#(?!\\s*[01]\\b)(?!\\p{Nd}\\p{Nd}#)"
+          "match": "^#(?![(\\[])(?!\\s*[01]\\b)(?!\\p{Nd}\\p{Nd}#)",
+          "comment": "Module declaration. The lookaheads keep it off a boolean, a numeral-mode switch, and — since v0.0.9 — a `#(`/`#[` literal that happens to start a line."
         },
         {
           "name": "keyword.operator.namespace.zymbol",
@@ -377,7 +444,9 @@
           "begin": "#\\|",
           "end": "\\|",
           "patterns": [
-            { "include": "$self" }
+            {
+              "include": "$self"
+            }
           ]
         }
       ]
@@ -389,7 +458,9 @@
           "begin": "#\\^(?:[.!][0-9]+)?\\|",
           "end": "\\|",
           "patterns": [
-            { "include": "$self" }
+            {
+              "include": "$self"
+            }
           ]
         },
         {
@@ -397,7 +468,9 @@
           "begin": "#,(?:[.!][0-9]+)?\\|",
           "end": "\\|",
           "patterns": [
-            { "include": "$self" }
+            {
+              "include": "$self"
+            }
           ]
         },
         {
@@ -406,7 +479,9 @@
           "begin": "#\\.[0-9]+\\|",
           "end": "\\|",
           "patterns": [
-            { "include": "$self" }
+            {
+              "include": "$self"
+            }
           ]
         },
         {
@@ -415,7 +490,9 @@
           "begin": "#![0-9]+\\|",
           "end": "\\|",
           "patterns": [
-            { "include": "$self" }
+            {
+              "include": "$self"
+            }
           ]
         },
         {
@@ -423,7 +500,9 @@
           "begin": "0b\\|",
           "end": "\\|",
           "patterns": [
-            { "include": "$self" }
+            {
+              "include": "$self"
+            }
           ]
         },
         {
@@ -431,7 +510,9 @@
           "begin": "0o\\|",
           "end": "\\|",
           "patterns": [
-            { "include": "$self" }
+            {
+              "include": "$self"
+            }
           ]
         },
         {
@@ -439,7 +520,9 @@
           "begin": "0d\\|",
           "end": "\\|",
           "patterns": [
-            { "include": "$self" }
+            {
+              "include": "$self"
+            }
           ]
         },
         {
@@ -447,7 +530,9 @@
           "begin": "0x\\|",
           "end": "\\|",
           "patterns": [
-            { "include": "$self" }
+            {
+              "include": "$self"
+            }
           ]
         }
       ]
@@ -470,7 +555,8 @@
           "name": "constant.numeric.base.hexadecimal.zymbol",
           "match": "\\b0x[0-9A-Fa-f]+\\b"
         }
-      ]
+      ],
+      "comment": "Must precede #numbers: `\\b[0-9]+\\b` matches the leading `0` of `0xFF` first, which split the literal into the number 0 and an identifier `xFF`."
     },
     "lifetime-end": {
       "patterns": [
@@ -525,6 +611,11 @@
           "comment": "Semicolon path separator inside index navigation [i>j ; k>l]",
           "name": "punctuation.separator.path.zymbol",
           "match": ";"
+        },
+        {
+          "comment": "A bare `~` is the working-copy parameter mark, `f(a~)`. Every other `~` belongs to a longer operator matched earlier (`<~`, `@~`, `$~`, `$~~`), so one reaching here is that mark and nothing else.",
+          "name": "storage.modifier.working-copy.zymbol",
+          "match": "~"
         }
       ]
     },
@@ -534,32 +625,48 @@
           "comment": "Pre-hot function call: °name(...) — ° as hot marker, base name as function",
           "match": "(°)([^\\s\\p{Nd}\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°][^\\s\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°]*)(?=\\s*\\()",
           "captures": {
-            "1": { "name": "keyword.operator.hot-definition.zymbol" },
-            "2": { "name": "entity.name.function.zymbol" }
+            "1": {
+              "name": "keyword.operator.hot-definition.zymbol"
+            },
+            "2": {
+              "name": "entity.name.function.zymbol"
+            }
           }
         },
         {
           "comment": "Pre-hot identifier: °name — ° as hot marker (anchors above nearest loop), base name as variable",
           "match": "(°)([^\\s\\p{Nd}\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°][^\\s\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°]*)",
           "captures": {
-            "1": { "name": "keyword.operator.hot-definition.zymbol" },
-            "2": { "name": "variable.other.zymbol" }
+            "1": {
+              "name": "keyword.operator.hot-definition.zymbol"
+            },
+            "2": {
+              "name": "variable.other.zymbol"
+            }
           }
         },
         {
           "comment": "Hot function call: name°(...) — base name highlighted as function, ° as hot marker",
           "match": "([^\\s\\p{Nd}\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°][^\\s\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°]*)(°)(?=\\s*\\()",
           "captures": {
-            "1": { "name": "entity.name.function.zymbol" },
-            "2": { "name": "keyword.operator.hot-definition.zymbol" }
+            "1": {
+              "name": "entity.name.function.zymbol"
+            },
+            "2": {
+              "name": "keyword.operator.hot-definition.zymbol"
+            }
           }
         },
         {
           "comment": "Hot identifier: name° — base name as variable, ° as hot-definition marker",
           "match": "([^\\s\\p{Nd}\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°][^\\s\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\°]*)(°)",
           "captures": {
-            "1": { "name": "variable.other.zymbol" },
-            "2": { "name": "keyword.operator.hot-definition.zymbol" }
+            "1": {
+              "name": "variable.other.zymbol"
+            },
+            "2": {
+              "name": "keyword.operator.hot-definition.zymbol"
+            }
           }
         }
       ]
@@ -579,6 +686,20 @@
           "comment": "Same exclusion logic as function-calls but without the lookahead. Covers all Unicode scripts, emoji, Klingon pIqaD, and fictional languages.",
           "name": "variable.other.zymbol",
           "match": "[^\\s\\p{Nd}\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\][^\\s\"'><!=+\\-*/%^&|?:.,;()\\[\\]{}@~#$¶\\\\]*"
+        }
+      ]
+    },
+    "collection-literals": {
+      "patterns": [
+        {
+          "comment": "`#(…)` the dictionary — the `#` is part of the literal, not a stray mark: `#()` is the empty dictionary and `()` would be the empty tuple as well.",
+          "name": "punctuation.definition.dictionary.zymbol",
+          "match": "#(?=\\()"
+        },
+        {
+          "comment": "`#[…]` an array with a DECLARED mix of element types — the same type as `[…]`, with the mix declared instead of checked.",
+          "name": "punctuation.definition.array.mixed.zymbol",
+          "match": "#(?=\\[)"
         }
       ]
     }

@@ -395,14 +395,14 @@ swap(a<~, b<~) {
 >> classify(7) ¶      // → 7
 
 counter = 0
-increment(counter)
+increment(counter<~)
 >> counter ¶          // → 1
 
 >> process(5) ¶       // → 10
 
 px = 10
 py = 20
-swap(px, py)
+swap(px<~, py<~)
 >> "px=" px " py=" py ¶    // → px=20 py=10
 
 // Recursion
@@ -451,12 +451,17 @@ apply(f, v) { <~ f(v) }
 
 
 // =============================================================================
-// COLLECTIONS  (array  positional tuple  named tuple)
+// COLLECTIONS  (array  #[declared mix]  positional tuple  dictionary)
 // =============================================================================
 
 arr  = [1, 2, 3, 4, 5]
+mix  = #[1, "two", 3.0]          // #[…] — the mix is DECLARED, not checked
 tup  = (10, 20, 30)
-ntup = #(name: "Ana", age: 25)
+ntup = #(name: "Ana", age: 25)   // #(…) — the dictionary
+
+// `#[…]` and `[…]` are the SAME TYPE: the mark declares the mix, and `#?`
+// reads it back from what the array holds, not from how it was written.
+>> mix#? ¶                       // → (##[, 3, [1, two, 3])
 
 // Access  (1-based indexing — arr[0] is a runtime error)
 >> arr[1] ¶      // → 1
@@ -526,9 +531,13 @@ updated    = arr[2]$~ 99
 >> updated ¶                          // → [1, 99, 3, 4, 5]
 
 
-// --- Indexed assignment ---
+// --- Updating an element: `[i]$~`, never `[i] =` ---
+//
+// `arr[i] = v` is WITHDRAWN — the language's one invariant. `=` gives a value
+// to a NAME; changing part of a collection is the `$~` family. Result
+// discarded → modifies in place; result used → builds a copy.
 
-arr[1] = 99
+arr[1]$~ 99
 >> arr ¶                              // → [99, 2, 3, 4, 5]
 
 
@@ -575,8 +584,8 @@ replaced = s$~~["l":"L"]
 rep1 = s$~~["l":"L":1]
 >> rep1 ¶                             // → heLlo world
 
-// String split by char (/ operator on string + char)
-parts = "a,b,c,d" / ','
+// String split by char — `$/`, not `/`: the bare slash is numeric division
+parts = "a,b,c,d" $/ ','
 >> parts ¶                            // → [a, b, c, d]
 
 // String iteration (char by char)
@@ -827,7 +836,9 @@ calc_r = <\ "echo \"scale=2; 355/113\" | bc" \>
 // Variable interpolation inside bash command
 >> "Bash interpolation:" ¶
 bash_name = "world"
-echo_r = <\ echo "hello {bash_name}" \>
+// The command is ONE quoted string: that is the form interpolation is
+// defined for (REFERENCE.md L9). Unquoted, `echo` is read as a name.
+echo_r = <\ "echo hello {bash_name}" \>
 >> echo_r
 
 // Script execution — runs another .zy file, captures its output
@@ -840,11 +851,13 @@ script_zy_out3 = </ ./test_script.zy /> //Error grave no compila
 >> script_zy_out3
 
 >> "Running shell zymbol_script" ¶
-script_sh_out1 = <\ zymbol run /home/rakzo/github/zymbol-lang/vscode/test_script.zy \> //Funciona
+script_sh_out1 = <\ "zymbol run /home/rakzo/github/zymbol-lang/vscode/test_script.zy" \> //Funciona
 >> script_sh_out1 ¶
-script_pwd = <\ pwd \>
+// The command is always ONE quoted string — `<\ pwd \>` unquoted is read as
+// the name `pwd` and fails with "'pwd' is undefined".
+script_pwd = <\ "pwd" \>
 >> "PWD: "script_pwd ¶
-script_sh_out2 = <\ zymbol run vscode/test_script.zy \> //Error los dos archivos estan en la misma ruta!
+script_sh_out2 = <\ "zymbol run vscode/test_script.zy" \> //Error los dos archivos estan en la misma ruta!
 >> script_sh_out2 ¶
 script_sh_out3 = <\"zymbol run ./vscode/test_script.zy" \> //Error los dos archivos estan en la misma ruta!
 >> script_sh_out3 ¶
@@ -1031,8 +1044,9 @@ pad = " " $* 5
 // @~ N — sleep N milliseconds
 @~ 0    // sleep 0 ms (no-op for syntax coverage)
 
-// >>? — query terminal size; returns [rows, cols] array
-[term_h, term_w] = >>?
+// >>? — query terminal size; returns a TUPLE (rows, cols), so the pattern is
+// `(…)`. `#?` says `##)`; an array pattern is refused.
+(term_h, term_w) = >>?
 >> "terminal: " term_h "x" term_w ¶
 
 // >>! — clear terminal screen  (commented — resets display)
