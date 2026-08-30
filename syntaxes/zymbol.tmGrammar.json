@@ -170,9 +170,9 @@
     "numeral-mode": {
       "patterns": [
         {
-          "comment": "Mode-switch token: #d0d9# where d0/d9 are the 0 and 9 digits of any Unicode numeral block, including Klingon pIqaD PUA digits U+F8F0–U+F8F9 which have no \\p{Nd} category.",
+          "comment": "Mode-switch token: #d0d9# where d0/d9 are the 0 and 9 digits of any Unicode numeral block. Two exceptions are spelled out because Oniguruma's \\p{Nd} does not contain them: Klingon pIqaD (U+F8F0-U+F8F9) is Private Use and has no category at all, and Kawi (U+11F50) and Nag Mundari (U+1E4F0) are Unicode 15.0 blocks the bundled Oniguruma's tables predate. The other 29 astral blocks the language supports match \\p{Nd} correctly — measured, not assumed.",
           "name": "keyword.control.numeral-mode.zymbol",
-          "match": "#(?:\\p{Nd}|[\\uF8F0-\\uF8F9])(?:\\p{Nd}|[\\uF8F0-\\uF8F9])#"
+          "match": "#(?:\\p{Nd}|[\\uF8F0-\\uF8F9]|[\\x{11F50}-\\x{11F59}]|[\\x{1E4F0}-\\x{1E4F9}])(?:\\p{Nd}|[\\uF8F0-\\uF8F9]|[\\x{11F50}-\\x{11F59}]|[\\x{1E4F0}-\\x{1E4F9}])#"
         }
       ]
     },
