@@ -234,7 +234,7 @@
       "settings": { "foreground": "#1a6a99" }
     },
     {
-      "name": "Keywords — control flow (? @ ?? _ <~ <# #>  ¶ \\\\ >< @: <\\ \\>)",
+      "name": "Reserved marks (TextMate `keyword.*` scope) — control flow (? @ ?? _ <~ <# #>  ¶ \\\\ >< @: <\\ \\>)",
       "scope": [
         "keyword.control",
         "keyword.operator.return-output",
