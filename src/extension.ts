@@ -92,6 +92,36 @@ let statusBarItem: vscode.StatusBarItem | undefined;
 // Terminal instance for running files
 let zymbolTerminal: vscode.Terminal | undefined;
 
+// Where the extension reports which binaries it decided to use.
+let extensionLog: vscode.OutputChannel | undefined;
+
+function log(message: string): void {
+    if (!extensionLog) {
+        extensionLog = vscode.window.createOutputChannel('Zymbol-Lang');
+    }
+    extensionLog.appendLine(message);
+}
+
+/**
+ * Report the binary the server is about to be started from, and its version.
+ *
+ * Which binary answers is not a detail: an installed copy one release behind
+ * reports diagnostics the current sources do not produce, and nothing on screen
+ * says so — a red squiggle looks the same whichever binary drew it. This is the
+ * first thing to check when the editor and the CLI disagree.
+ */
+function reportServerBinary(command: string, args: string[]): void {
+    log(`Language server: ${command} ${args.join(' ')}`.trimEnd());
+    try {
+        const cp = require('child_process');
+        cp.execFile(command, ['--version'], { timeout: 5000 }, (err: any, stdout: string) => {
+            log(err ? `  version: unavailable (${err.message})` : `  version: ${stdout.trim()}`);
+        });
+    } catch (e) {
+        log(`  version: unavailable (${e})`);
+    }
+}
+
 function updateStatusBar(text: string, tooltip?: string): void {
     if (!statusBarItem) { return; }
     statusBarItem.text = text;
@@ -121,53 +151,107 @@ function findServer(): { command: string; args: string[] } {
         return { command: configuredPath, args: [] };
     }
 
-    const home = os.homedir();
-    const workspaceFolders = vscode.workspace.workspaceFolders ?? [];
-
-    // --- Preferred: zymbol binary + lsp subcommand ---
-    const zymbolCandidates: string[] = [
-        path.join(home, '.cargo', 'bin', 'zymbol'),
-        path.join(home, '.local', 'bin', 'zymbol'),
-        '/usr/local/bin/zymbol',
-        '/usr/bin/zymbol',
-    ];
-    for (const folder of workspaceFolders) {
-        const base = folder.uri.fsPath;
-        zymbolCandidates.push(
-            path.join(base, '..', 'interpreter', 'target', 'release', 'zymbol'),
-            path.join(base, 'interpreter', 'target', 'release', 'zymbol'),
-            path.join(base, 'target', 'release', 'zymbol'),
-        );
-    }
-    for (const candidate of zymbolCandidates) {
+    for (const candidate of binaryCandidates('zymbol')) {
         if (fs.existsSync(candidate)) {
             return { command: candidate, args: ['lsp'] };
         }
     }
 
     // --- Legacy fallback: standalone zymbol-lsp binary ---
-    const lspCandidates: string[] = [
-        path.join(home, '.cargo', 'bin', 'zymbol-lsp'),
-        path.join(home, '.local', 'bin', 'zymbol-lsp'),
-        '/usr/local/bin/zymbol-lsp',
-        '/usr/bin/zymbol-lsp',
-    ];
-    for (const folder of workspaceFolders) {
-        const base = folder.uri.fsPath;
-        lspCandidates.push(
-            path.join(base, '..', 'interpreter', 'target', 'release', 'zymbol-lsp'),
-            path.join(base, 'interpreter', 'target', 'release', 'zymbol-lsp'),
-            path.join(base, 'target', 'release', 'zymbol-lsp'),
-        );
-    }
-    for (const candidate of lspCandidates) {
+    for (const candidate of binaryCandidates('zymbol-lsp')) {
         if (fs.existsSync(candidate)) {
             return { command: candidate, args: [] };
         }
     }
 
     // PATH fallback — prefer zymbol lsp
-    return { command: 'zymbol', args: ['lsp'] };
+    return { command: exeName('zymbol'), args: ['lsp'] };
+}
+
+/**
+ * The file name of an executable on this platform.
+ *
+ * Windows needs the `.exe`, and needs it in two different ways. `fs.existsSync`
+ * on a Windows path without it is simply false, so every candidate below used to
+ * miss and the search fell through to the PATH — which meant a freshly built
+ * `target\release\zymbol.exe` was never picked up, and the extension went on
+ * talking to whatever version was installed. And `child_process.spawn` does not
+ * apply PATHEXT, so spawning the bare name `zymbol` fails with ENOENT even when
+ * `zymbol.exe` is on the PATH.
+ */
+function exeName(base: string): string {
+    return process.platform === 'win32' ? `${base}.exe` : base;
+}
+
+/**
+ * Where to look for `base`, in order: a build inside the open workspace first,
+ * then the installed locations, and the PATH as a last resort.
+ *
+ * The workspace build winning is what makes "rebuild, restart the server, test
+ * it" work without configuration. Someone with `interpreter/target/release/` in
+ * their workspace is working on the interpreter and means that binary; a normal
+ * user has no build tree at all, so for them the order changes nothing. The one
+ * case it gets wrong is a stale forgotten build in the workspace — which is why
+ * the chosen binary is now reported on startup instead of being invisible.
+ */
+function binaryCandidates(base: string): string[] {
+    const home = os.homedir();
+    const exe = exeName(base);
+    const candidates: string[] = [];
+
+    for (const folder of vscode.workspace.workspaceFolders ?? []) {
+        const root = folder.uri.fsPath;
+        candidates.push(
+            path.join(root, 'interpreter', 'target', 'release', exe),
+            path.join(root, '..', 'interpreter', 'target', 'release', exe),
+            path.join(root, 'target', 'release', exe),
+        );
+    }
+
+    candidates.push(
+        path.join(home, '.cargo', 'bin', exe),
+        path.join(home, '.local', 'bin', exe),
+    );
+
+    if (process.platform === 'win32') {
+        // Where the .msi and the NSIS installer put it.
+        for (const programFiles of [process.env.ProgramFiles, process.env['ProgramFiles(x86)']]) {
+            if (programFiles) {
+                candidates.push(path.join(programFiles, 'Zymbol-Lang', exe));
+            }
+        }
+    } else {
+        candidates.push(`/usr/local/bin/${exe}`, `/usr/bin/${exe}`);
+    }
+
+    return candidates;
+}
+
+/**
+ * The CLI to run for `zymbol run` / `zymbol fmt`.
+ *
+ * The `executablePath` setting defaults to the bare name `zymbol`, which is not
+ * something `spawn` can start on Windows. Resolving it to a real path keeps the
+ * setting meaningful while making the default work on every platform, and avoids
+ * `shell: true` — the workspace that prompted this hotfix lives in
+ * `D:\OneDrive - Abastible S.A\...`, and handing a path with spaces to cmd.exe is
+ * how quoting bugs are born.
+ */
+function findCli(): string {
+    const configured = vscode.workspace.getConfiguration('zymbol-lang')
+        .get<string>('executablePath', 'zymbol');
+
+    if (configured && configured !== 'zymbol') {
+        // An explicit setting is the user's business; honour it as written.
+        return configured;
+    }
+
+    for (const candidate of binaryCandidates('zymbol')) {
+        if (fs.existsSync(candidate)) {
+            return candidate;
+        }
+    }
+    return exeName('zymbol');
 }
 
 
@@ -183,7 +267,7 @@ class ZymbolFormattingProvider implements vscode.DocumentFormattingEditProvider 
     ): vscode.ProviderResult<vscode.TextEdit[]> {
         return new Promise((resolve, reject) => {
             const config = vscode.workspace.getConfiguration('zymbol-lang');
-            const executablePath = config.get<string>('executablePath', 'zymbol');
+            const executablePath = findCli();
             const indentSize = config.get<number>('formatter.indentSize', options.tabSize);
 
             const cp = require('child_process');
@@ -322,7 +406,7 @@ function registerRunCommand(context: vscode.ExtensionContext): vscode.Disposable
         await document.save();
 
         const config = vscode.workspace.getConfiguration('zymbol-lang');
-        const executablePath = config.get<string>('executablePath', 'zymbol');
+        const executablePath = findCli();
         const runInTerminal = config.get<boolean>('runInTerminal', true);
 
         const filePath = document.uri.fsPath;
@@ -330,7 +414,9 @@ function registerRunCommand(context: vscode.ExtensionContext): vscode.Disposable
         if (runInTerminal) {
             const terminal = getOrCreateTerminal();
             terminal.show();
-            terminal.sendText(`${executablePath} run "${filePath}"`);
+            // The binary path is quoted too: it can now be an absolute path, and
+            // "C:\Program Files\Zymbol-Lang\zymbol.exe" has a space in it.
+            terminal.sendText(`"${executablePath}" run "${filePath}"`);
         } else {
             const outputChannel = vscode.window.createOutputChannel('Zymbol-Lang');
             outputChannel.show();
@@ -375,6 +461,7 @@ function startLanguageClient(context: vscode.ExtensionContext): void {
     }
 
     const { command: serverCommand, args: serverArgs } = findServer();
+    reportServerBinary(serverCommand, serverArgs);
 
     updateStatusBar('$(sync~spin) Zymbol', 'Zymbol Analyser: starting…');
 

@@ -103,7 +103,8 @@ identifiers highlight exactly like ASCII ones.
 ### Themes and icons
 
 Two colour themes ship with the extension and are designed around symbolic code: because
-Zymbol has no keywords, the colour budget that a normal theme spends on `if`/`while`/`return`
+Zymbol has no words in its grammar, the colour budget that a normal theme spends on
+`if`/`while`/`return`
 goes to operator *families* instead, so `$`-collection, `@`-loop and `>>`-I/O operators stay
 distinguishable at a glance.
 
