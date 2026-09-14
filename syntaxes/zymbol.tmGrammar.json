@@ -16,6 +16,9 @@
       "include": "#numeral-mode"
     },
     {
+      "include": "#base-conversions"
+    },
+    {
       "include": "#base-literals"
     },
     {
@@ -494,7 +497,12 @@
               "include": "$self"
             }
           ]
-        },
+        }
+      ]
+    },
+    "base-conversions": {
+      "comment": "Must precede #numbers, like #base-literals, and for a sharper reason: the Unicode integer rule `\\p{Nd}+` has no word boundary, so it took the `0` of `0x|n|`, left `x` an identifier, and the two bars unscoped (TM-002).",
+      "patterns": [
         {
           "name": "keyword.operator.base-conversion.binary.zymbol",
           "begin": "0b\\|",
