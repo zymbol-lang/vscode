@@ -458,7 +458,7 @@
       "patterns": [
         {
           "name": "keyword.operator.format.scientific.zymbol",
-          "begin": "#\\^(?:[.!][0-9]+)?\\|",
+          "begin": "#\\^(?:[.!](?:[0-9]+|[\\p{L}_][\\p{L}_0-9]*))?\\|",
           "end": "\\|",
           "patterns": [
             {
@@ -468,7 +468,7 @@
         },
         {
           "name": "keyword.operator.format.comma.zymbol",
-          "begin": "#,(?:[.!][0-9]+)?\\|",
+          "begin": "#,(?:[.!](?:[0-9]+|[\\p{L}_][\\p{L}_0-9]*))?\\|",
           "end": "\\|",
           "patterns": [
             {
@@ -477,9 +477,9 @@
           ]
         },
         {
-          "comment": "Precision round: #.N|expr|",
+          "comment": "Precision round: #.N|expr|. The count may be a NAME as well as digits (`#.v|x|`), as the lexer and the playground highlighter take it.",
           "name": "keyword.operator.precision.round.zymbol",
-          "begin": "#\\.[0-9]+\\|",
+          "begin": "#\\.(?:[0-9]+|[\\p{L}_][\\p{L}_0-9]*)\\|",
           "end": "\\|",
           "patterns": [
             {
@@ -488,9 +488,9 @@
           ]
         },
         {
-          "comment": "Precision truncate: #!N|expr|",
+          "comment": "Precision truncate: #!N|expr|, the count a number or a name.",
           "name": "keyword.operator.precision.trunc.zymbol",
-          "begin": "#![0-9]+\\|",
+          "begin": "#!(?:[0-9]+|[\\p{L}_][\\p{L}_0-9]*)\\|",
           "end": "\\|",
           "patterns": [
             {
