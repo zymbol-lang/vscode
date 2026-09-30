@@ -200,9 +200,9 @@
     "error-types": {
       "patterns": [
         {
-          "comment": "Error type specifiers in catch clauses: ##Div ##IO ##Index ##Type ##Parse ##Network ##_",
+          "comment": "Error kinds: after :! in a catch clause, and as the constructor ##Kind(\"message\"). The name is in any script, as the lexers take it (##Κανόνας).",
           "name": "support.type.zymbol",
-          "match": "##[A-Za-z_][A-Za-z0-9_]*"
+          "match": "##[\\p{L}_][\\p{L}\\p{M}\\p{N}_]*"
         }
       ]
     },
