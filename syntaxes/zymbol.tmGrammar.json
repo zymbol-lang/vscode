@@ -191,7 +191,7 @@
     "numeric-casts": {
       "patterns": [
         {
-          "comment": "Type cast / input-typespec operators — must precede strings, chars and error-types (## prefix). Includes ##\" (String) and ##' (Char) used as typed-input markers.",
+          "comment": "Type cast / input-typespec operators — must precede strings, chars and error-types (## prefix). Includes ##\" (String) and ##' (Char) used as typed-input markers; ##' is also the Int-to-Char cast in an expression (v0.0.10).",
           "name": "keyword.operator.cast.zymbol",
           "match": "##\\.|###|##!|##\\\"|##'"
         }
