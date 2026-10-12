@@ -15,6 +15,7 @@
   <img alt="TypeScript" src="https://img.shields.io/badge/language-TypeScript-blue?style=flat-square"/>
   <img alt="license AGPL-3.0" src="https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square"/>
   <img alt="VS Code ^1.75.0" src="https://img.shields.io/badge/VS%20Code-%5E1.75.0-007ACC?style=flat-square"/>
+  <a href="https://zymbol-lang.org"><img alt="web: zymbol-lang.org" src="https://img.shields.io/badge/web-zymbol--lang.org-7c3aed?style=flat-square"/></a>
 </p>
 
 > **Revisado para v0.0.8 — 2026-08-01** · extension **v0.1.5**
