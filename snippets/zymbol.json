@@ -369,7 +369,7 @@
   "Database Session (std/db)": {
     "prefix": "dbconnect",
     "body": [
-      "${1:db}::connect(\"${2:c}\", \"${3:Driver={SQLite3};Database=/tmp/app.db;}\")",
+      "${1:db}::connect(\"${2:c}\", \"${3:Driver=\\\\{SQLite3\\\\\\};Database=/tmp/app.db;}\")",
       "${1:db}::exec(\"${2:c}\", \"${4:CREATE TABLE IF NOT EXISTS t(id INTEGER PRIMARY KEY)}\")",
       "${5:filas} = ${1:db}::query(\"${2:c}\", \"${6:SELECT * FROM t WHERE id = ?}\", (${7:1},))",
       "${1:db}::disconnect(\"${2:c}\")"

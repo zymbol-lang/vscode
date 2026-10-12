@@ -16,6 +16,9 @@
       "include": "#numeral-mode"
     },
     {
+      "include": "#base-conversions"
+    },
+    {
       "include": "#base-literals"
     },
     {
@@ -188,7 +191,7 @@
     "numeric-casts": {
       "patterns": [
         {
-          "comment": "Type cast / input-typespec operators — must precede strings, chars and error-types (## prefix). Includes ##\" (String) and ##' (Char) used as typed-input markers.",
+          "comment": "Type cast / input-typespec operators — must precede strings, chars and error-types (## prefix). Includes ##\" (String) and ##' (Char) used as typed-input markers; ##' is also the Int-to-Char cast in an expression (v0.0.10).",
           "name": "keyword.operator.cast.zymbol",
           "match": "##\\.|###|##!|##\\\"|##'"
         }
@@ -197,9 +200,9 @@
     "error-types": {
       "patterns": [
         {
-          "comment": "Error type specifiers in catch clauses: ##Div ##IO ##Index ##Type ##Parse ##Network ##_",
+          "comment": "Error kinds: after :! in a catch clause, and as the constructor ##Kind(\"message\"). The name is in any script, as the lexers take it (##Κανόνας).",
           "name": "support.type.zymbol",
-          "match": "##[A-Za-z_][A-Za-z0-9_]*"
+          "match": "##[\\p{L}_][\\p{L}\\p{M}\\p{N}_]*"
         }
       ]
     },
@@ -455,7 +458,7 @@
       "patterns": [
         {
           "name": "keyword.operator.format.scientific.zymbol",
-          "begin": "#\\^(?:[.!][0-9]+)?\\|",
+          "begin": "#\\^(?:[.!](?:[0-9]+|[\\p{L}_][\\p{L}_0-9]*))?\\|",
           "end": "\\|",
           "patterns": [
             {
@@ -465,7 +468,7 @@
         },
         {
           "name": "keyword.operator.format.comma.zymbol",
-          "begin": "#,(?:[.!][0-9]+)?\\|",
+          "begin": "#,(?:[.!](?:[0-9]+|[\\p{L}_][\\p{L}_0-9]*))?\\|",
           "end": "\\|",
           "patterns": [
             {
@@ -474,9 +477,9 @@
           ]
         },
         {
-          "comment": "Precision round: #.N|expr|",
+          "comment": "Precision round: #.N|expr|. The count may be a NAME as well as digits (`#.v|x|`), as the lexer and the playground highlighter take it.",
           "name": "keyword.operator.precision.round.zymbol",
-          "begin": "#\\.[0-9]+\\|",
+          "begin": "#\\.(?:[0-9]+|[\\p{L}_][\\p{L}_0-9]*)\\|",
           "end": "\\|",
           "patterns": [
             {
@@ -485,16 +488,21 @@
           ]
         },
         {
-          "comment": "Precision truncate: #!N|expr|",
+          "comment": "Precision truncate: #!N|expr|, the count a number or a name.",
           "name": "keyword.operator.precision.trunc.zymbol",
-          "begin": "#![0-9]+\\|",
+          "begin": "#!(?:[0-9]+|[\\p{L}_][\\p{L}_0-9]*)\\|",
           "end": "\\|",
           "patterns": [
             {
               "include": "$self"
             }
           ]
-        },
+        }
+      ]
+    },
+    "base-conversions": {
+      "comment": "Must precede #numbers, like #base-literals, and for a sharper reason: the Unicode integer rule `\\p{Nd}+` has no word boundary, so it took the `0` of `0x|n|`, left `x` an identifier, and the two bars unscoped (TM-002).",
+      "patterns": [
         {
           "name": "keyword.operator.base-conversion.binary.zymbol",
           "begin": "0b\\|",
