@@ -344,7 +344,7 @@ is not restarted automatically when the binary on disk changes.
 
 ## Resources
 
-- [Interpreter](https://github.com/zymbol-lang/interpreter) — Rust workspace, 19 crates
+- [Interpreter](https://github.com/zymbol-lang/interpreter) — Rust workspace, 20 crates
 - [Website](https://zymbol-lang.org) · [Playground](https://zymbol-lang.org/playground.html) — run Zymbol in the browser, no install
 - [Aprende Zymbol](https://zymbol-lang.github.io/aprende-zymbol/) — structured course, in Spanish
 - [GUIDE.md](https://github.com/zymbol-lang/interpreter/blob/main/GUIDE.md) — the authoritative language reference
