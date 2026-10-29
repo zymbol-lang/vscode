@@ -458,7 +458,7 @@
       "patterns": [
         {
           "name": "keyword.operator.format.scientific.zymbol",
-          "begin": "#\\^(?:[.!](?:[0-9]+|[\\p{L}_][\\p{L}_0-9]*))?\\|",
+          "begin": "#\\^(?:[.!](?:(?:\\p{Nd}|[\\uF8F0-\\uF8F9]|[\\x{11F50}-\\x{11F59}]|[\\x{1E4F0}-\\x{1E4F9}])+|[\\p{L}_][\\p{L}\\p{N}_]*))?\\|",
           "end": "\\|",
           "patterns": [
             {
@@ -468,7 +468,7 @@
         },
         {
           "name": "keyword.operator.format.comma.zymbol",
-          "begin": "#,(?:[.!](?:[0-9]+|[\\p{L}_][\\p{L}_0-9]*))?\\|",
+          "begin": "#,(?:[.!](?:(?:\\p{Nd}|[\\uF8F0-\\uF8F9]|[\\x{11F50}-\\x{11F59}]|[\\x{1E4F0}-\\x{1E4F9}])+|[\\p{L}_][\\p{L}\\p{N}_]*))?\\|",
           "end": "\\|",
           "patterns": [
             {
@@ -477,9 +477,9 @@
           ]
         },
         {
-          "comment": "Precision round: #.N|expr|. The count may be a NAME as well as digits (`#.v|x|`), as the lexer and the playground highlighter take it.",
+          "comment": "Precision round: #.N|expr|. The count may be a NAME as well as digits (`#.v|x|`), as the lexer and the playground highlighter take it. Its digits are of any script (`#.२|x|`), by the same class as the #d0d9# rule and for the same reasons; a name takes digits of any script too (`#.n२|x|`) (ZYJS-072).",
           "name": "keyword.operator.precision.round.zymbol",
-          "begin": "#\\.(?:[0-9]+|[\\p{L}_][\\p{L}_0-9]*)\\|",
+          "begin": "#\\.(?:(?:\\p{Nd}|[\\uF8F0-\\uF8F9]|[\\x{11F50}-\\x{11F59}]|[\\x{1E4F0}-\\x{1E4F9}])+|[\\p{L}_][\\p{L}\\p{N}_]*)\\|",
           "end": "\\|",
           "patterns": [
             {
@@ -490,7 +490,7 @@
         {
           "comment": "Precision truncate: #!N|expr|, the count a number or a name.",
           "name": "keyword.operator.precision.trunc.zymbol",
-          "begin": "#!(?:[0-9]+|[\\p{L}_][\\p{L}_0-9]*)\\|",
+          "begin": "#!(?:(?:\\p{Nd}|[\\uF8F0-\\uF8F9]|[\\x{11F50}-\\x{11F59}]|[\\x{1E4F0}-\\x{1E4F9}])+|[\\p{L}_][\\p{L}\\p{N}_]*)\\|",
           "end": "\\|",
           "patterns": [
             {
