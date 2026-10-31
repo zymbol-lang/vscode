@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="extension v0.1.7" src="https://img.shields.io/badge/extension-v0.1.7-informational?style=flat-square"/>
+  <img alt="extension v0.1.8" src="https://img.shields.io/badge/extension-v0.1.8-informational?style=flat-square"/>
   <img alt="targets Zymbol v0.0.8" src="https://img.shields.io/badge/Zymbol-v0.0.8-7c3aed?style=flat-square"/>
   <img alt="TypeScript" src="https://img.shields.io/badge/language-TypeScript-blue?style=flat-square"/>
   <img alt="license AGPL-3.0" src="https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square"/>
@@ -155,8 +155,8 @@ bash install-zymbol.sh
 Every release ships a `.vsix` plus its SHA256:
 
 ```bash
-gh release download v0.1.7 -R zymbol-lang/vscode -p '*.vsix'
-code --install-extension zymbol-lang-0.1.7.vsix
+gh release download v0.1.8 -R zymbol-lang/vscode -p '*.vsix'
+code --install-extension zymbol-lang-0.1.8.vsix
 ```
 
 Or in VS Code: Extensions view → `...` → **Install from VSIX**.
@@ -337,7 +337,7 @@ is not restarted automatically when the binary on disk changes.
 
 - **No `stdterm` snippet.** `std/term` (display width, padding, centring, truncation)
   arrived in language v0.0.8, after extension v0.1.5 was packaged, and no extension since —
-  v0.1.7 included — has added one. Import it by hand:
+  v0.1.8 included — has added one. Import it by hand:
   `<# std/term => term`. Highlighting and LSP features are unaffected — the grammar does
   not special-case stdlib module names.
 
