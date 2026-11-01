@@ -324,7 +324,7 @@
     "body": [
       "<# std/random => ${1:rnd}"
     ],
-    "description": "Import std/random (entero rango peso_f64)"
+    "description": "Import std/random (entero rango peso_f64 semilla)"
   },
   "Import std/json": {
     "prefix": "stdjson",
