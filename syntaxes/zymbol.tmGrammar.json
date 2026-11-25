@@ -83,6 +83,9 @@
     },
     {
       "include": "#identifiers"
+    },
+    {
+      "include": "#char-conversion"
     }
   ],
   "repository": {
@@ -708,6 +711,17 @@
           "comment": "`#[…]` an array with a DECLARED mix of element types — the same type as `[…]`, with the mix declared instead of checked.",
           "name": "punctuation.definition.array.mixed.zymbol",
           "match": "#(?=\\[)"
+        }
+      ]
+    },
+    "char-conversion": {
+      "comment": "The bare bars |expr|: the character of a code, or of a text in any base (D-25, v0.0.12). Last in the top-level list, so `||`, `|>`, `>>|`, `<<|` and `$|` keep their own scopes; inside another pair of bars the enclosing rule's end is tried first, so a `|` there closes it, as the parser reads it.",
+      "name": "keyword.operator.char-conversion.zymbol",
+      "begin": "\\|(?![|>])",
+      "end": "\\|",
+      "patterns": [
+        {
+          "include": "$self"
         }
       ]
     }
